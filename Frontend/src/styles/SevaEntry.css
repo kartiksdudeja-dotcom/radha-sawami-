@@ -1,0 +1,627 @@
+.seva-entry-container {
+  padding: clamp(12px, 3vw, 30px);
+  background: #f3f4f6;
+  min-height: calc(100vh - 60px);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin: 0 auto;
+  width: 100%;
+  max-width: 100%;
+}
+
+.entry-header {
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: white;
+  padding: 20px 30px;
+  border-radius: 12px 12px 0 0;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  margin-bottom: 0;
+  border-top: none;
+}
+
+.back-button {
+  font-size: 2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  opacity: 0.8;
+}
+
+.back-button:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.entry-header h1 {
+  font-size: clamp(1.2rem, 4vw, 1.8rem);
+  margin: 0;
+  font-weight: 700;
+}
+
+.entry-content {
+  background: white;
+  border-radius: 0 0 12px 12px;
+  padding: 30px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.status-info {
+  border-bottom: 2px solid #3498db;
+  padding-bottom: 15px;
+  margin-bottom: 25px;
+}
+
+.status-info p {
+  margin: 10px 0;
+  font-size: 1rem;
+  display: flex;
+  gap: 10px;
+}
+
+.status-info .label {
+  color: #8b0000;
+  font-weight: 600;
+}
+
+.status-info .value {
+  color: #3498db;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.form-section {
+  margin-bottom: 25px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  font-weight: 600;
+  color: #2c3e50;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+}
+
+.form-input {
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  background: white;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.member-select {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.member-select:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.member-search {
+  position: relative;
+}
+
+.search-container {
+  position: relative;
+}
+
+.member-input {
+  width: 100%;
+  padding: 12px 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.member-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+.member-dropdown {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  max-height: 250px;
+  overflow-y: auto;
+  z-index: 100;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.member-dropdown-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f0f0f0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.member-dropdown-item:last-child {
+  border-bottom: none;
+  border-radius: 0 0 8px 8px;
+}
+
+.member-dropdown-item:hover {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding-left: 20px;
+}
+
+.member-dropdown-item .member-name {
+  font-weight: 500;
+}
+
+.member-dropdown-item .member-uid {
+  font-size: 0.85rem;
+  color: #888;
+}
+
+.member-dropdown-item:hover .member-uid {
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.dropdown-list {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border: 1px solid #ddd;
+  border-top: none;
+  border-radius: 0 0 8px 8px;
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.dropdown-item {
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.dropdown-item:last-child {
+  border-bottom: none;
+}
+
+.dropdown-item:hover {
+  background: #f0f0f0;
+  padding-left: 20px;
+}
+
+.monthly-info {
+  background: #e8f4f8;
+  padding: 15px 20px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  font-size: 0.95rem;
+  color: #2c3e50;
+}
+
+.monthly-info p {
+  margin: 0;
+}
+
+.monthly-info strong {
+  color: #3498db;
+  font-size: 1.1rem;
+}
+
+.member-history {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 15px;
+  margin-bottom: 25px;
+}
+
+.history-card {
+  background: #f0f8ff;
+  border-left: 4px solid #3498db;
+  padding: 10px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.history-card p {
+  margin: 0;
+  font-size: 0.95rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.history-card .label {
+  color: #555;
+  font-weight: 600;
+}
+
+.history-card .value {
+  color: #3498db;
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.table-container {
+  overflow-x: auto;
+  margin-bottom: 25px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.seva-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+}
+
+.seva-table thead {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+  color: white;
+  font-weight: 600;
+}
+
+.seva-table th {
+  padding: 10px;
+  text-align: left;
+  font-size: 0.9rem;
+  border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.seva-table th:last-child {
+  border-right: none;
+}
+
+.seva-table tbody tr {
+  border-bottom: 1px solid #ecf0f1;
+  transition: background 0.2s ease;
+}
+
+.seva-table tbody tr:hover {
+  background: #f8f9fa;
+}
+
+.seva-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.seva-table td {
+  padding: 8px 10px;
+  font-size: 0.9rem;
+}
+
+.srno {
+  color: #7f8c8d;
+  font-weight: 600;
+  text-align: center;
+  width: 80px;
+}
+
+.seva-name {
+  color: #2c3e50;
+  font-weight: 500;
+  min-width: 150px;
+}
+
+.input-cell {
+  text-align: center;
+}
+
+.table-input {
+  width: 100px;
+  padding: 8px 10px;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.table-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+/* Remove spinner arrows from number inputs */
+.table-input[type="number"]::-webkit-outer-spin-button,
+.table-input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.table-input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.submit-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 15px;
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #ecf0f1;
+}
+
+.btn-submit {
+  padding: 12px 50px;
+  border: none;
+  border-radius: 8px;
+  background: #ffd700;
+  color: #333;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-submit:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.btn-submit:active {
+  transform: translateY(0);
+}
+
+.add-row-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 0;
+  gap: 10px;
+}
+
+.btn-add-row {
+  padding: 12px 30px;
+  border: none;
+  border-radius: 8px;
+  background: #ffd700;
+  color: #333;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.btn-add-row:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.action-cell {
+  text-align: center;
+  padding: 15px;
+}
+
+.edit-delete-actions,
+.edit-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn-edit {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 5px 10px;
+  transition: all 0.2s ease;
+  color: #3498db;
+}
+
+.btn-edit:hover {
+  transform: scale(1.2);
+  filter: brightness(0.8);
+}
+
+.btn-delete {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.2rem;
+  padding: 5px 10px;
+  transition: all 0.2s ease;
+}
+
+.btn-delete:hover {
+  transform: scale(1.2);
+  filter: brightness(0.8);
+}
+
+.btn-save-edit,
+.btn-cancel-edit {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 5px 10px;
+  transition: all 0.2s ease;
+  font-weight: bold;
+}
+
+.btn-save-edit {
+  color: #27ae60;
+}
+
+.btn-save-edit:hover {
+  transform: scale(1.2);
+  color: #229954;
+}
+
+.btn-cancel-edit {
+  color: #e74c3c;
+}
+
+.btn-cancel-edit:hover {
+  transform: scale(1.2);
+  color: #c0392b;
+}
+
+.seva-input-edit {
+  width: 100%;
+  padding: 8px 10px;
+  border: 2px solid #3498db;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.seva-input-edit:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .seva-entry-container {
+    padding: 20px;
+  }
+
+  .entry-header {
+    padding: 15px 20px;
+  }
+
+  .entry-content {
+    padding: 20px;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+    gap: 15px;
+  }
+
+  .table-input {
+    width: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+  .seva-entry-container {
+    padding: 15px;
+    margin-left: 0;
+  }
+
+  .entry-header {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .entry-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .entry-content {
+    padding: 15px;
+  }
+
+  .seva-table {
+    font-size: 0.85rem;
+  }
+
+  .seva-table th,
+  .seva-table td {
+    padding: 10px;
+  }
+
+  .table-input {
+    width: 70px;
+    padding: 6px 8px;
+  }
+
+  .btn-submit {
+    padding: 10px 30px;
+    font-size: 0.9rem;
+  }
+
+  .status-info p {
+    flex-direction: column;
+    gap: 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .seva-entry-container {
+    padding: 10px;
+  }
+
+  .entry-header {
+    padding: 10px 15px;
+  }
+
+  .entry-header h1 {
+    font-size: 1.2rem;
+  }
+
+  .entry-content {
+    padding: 10px;
+  }
+
+  .form-row {
+    gap: 10px;
+  }
+
+  .seva-table {
+    font-size: 0.8rem;
+  }
+
+  .seva-table th,
+  .seva-table td {
+    padding: 8px 5px;
+  }
+
+  .table-input {
+    width: 60px;
+  }
+
+  .submit-container {
+    flex-direction: column;
+  }
+
+  .btn-submit {
+    width: 100%;
+  }
+}

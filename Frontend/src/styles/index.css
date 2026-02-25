@@ -1,0 +1,202 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Neumorphism Design System - Global Variables */
+:root {
+  /* Neumorphism Colors */
+  --neu-bg: #e8ecef;
+  --neu-bg-gradient: linear-gradient(135deg, #e8ecef 0%, #dde1e7 100%);
+  --neu-shadow-light: rgba(255, 255, 255, 0.8);
+  --neu-shadow-dark: rgba(163, 177, 198, 0.6);
+  --neu-shadow-dark-strong: rgba(163, 177, 198, 0.8);
+  
+  /* Primary Colors */
+  --neu-primary: #3b82f6;
+  --neu-primary-dark: #2563eb;
+  --neu-primary-light: #60a5fa;
+  --neu-primary-gradient: linear-gradient(145deg, #3b82f6, #2563eb);
+  
+  /* Secondary Colors */
+  --neu-success: #10b981;
+  --neu-success-dark: #059669;
+  --neu-success-gradient: linear-gradient(145deg, #10b981, #059669);
+  
+  --neu-danger: #ef4444;
+  --neu-danger-dark: #dc2626;
+  --neu-danger-gradient: linear-gradient(145deg, #ef4444, #dc2626);
+  
+  --neu-warning: #f59e0b;
+  --neu-warning-dark: #d97706;
+  --neu-warning-gradient: linear-gradient(145deg, #f59e0b, #d97706);
+  
+  --neu-purple: #8b5cf6;
+  --neu-purple-dark: #7c3aed;
+  --neu-purple-gradient: linear-gradient(145deg, #8b5cf6, #7c3aed);
+  
+  /* Text Colors */
+  --neu-text-primary: #1f2937;
+  --neu-text-secondary: #4b5563;
+  --neu-text-muted: #6b7280;
+  --neu-text-light: #9ca3af;
+  
+  /* Neumorphism Shadows */
+  --neu-shadow-outer: 8px 8px 16px var(--neu-shadow-dark), -8px -8px 16px var(--neu-shadow-light);
+  --neu-shadow-outer-sm: 4px 4px 8px var(--neu-shadow-dark), -4px -4px 8px var(--neu-shadow-light);
+  --neu-shadow-inner: inset 4px 4px 8px var(--neu-shadow-dark), inset -4px -4px 8px var(--neu-shadow-light);
+  --neu-shadow-inner-sm: inset 2px 2px 4px var(--neu-shadow-dark), inset -2px -2px 4px var(--neu-shadow-light);
+  
+  /* Border Radius */
+  --neu-radius-sm: 10px;
+  --neu-radius: 15px;
+  --neu-radius-lg: 20px;
+  --neu-radius-xl: 25px;
+  
+  /* Transitions */
+  --neu-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+html, body, #root {
+  width: 100%;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+  font-size: clamp(14px, 1vw, 16px);
+  background: var(--neu-bg-gradient);
+  color: var(--neu-text-primary);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Responsive Typography */
+@media (max-width: 768px) {
+  body {
+    font-size: clamp(13px, 1.5vw, 15px);
+  }
+
+  h1 {
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+  }
+
+  h2 {
+    font-size: clamp(1.1rem, 2.8vw, 1.3rem);
+  }
+
+  h3 {
+    font-size: clamp(1rem, 2.5vw, 1.1rem);
+  }
+
+  button, input, select {
+    font-size: clamp(0.9rem, 2vw, 1rem);
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: clamp(12px, 1.2vw, 14px);
+  }
+
+  h1 {
+    font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+  }
+
+  h2 {
+    font-size: clamp(1rem, 2.2vw, 1.1rem);
+  }
+
+  h3 {
+    font-size: clamp(0.9rem, 2vw, 1rem);
+  }
+
+  button, input, select {
+    font-size: clamp(0.85rem, 1.8vw, 0.95rem);
+    min-height: 44px;
+  }
+}
+
+/* Mobile-friendly inputs and buttons */
+@media (hover: none) and (pointer: coarse) {
+  input, select, textarea, button, a {
+    min-height: 48px;
+    min-width: 48px;
+  }
+
+  button {
+    padding: clamp(10px, 1.5vw, 12px) clamp(14px, 2vw, 16px);
+  }
+
+  input, select, textarea {
+    padding: clamp(10px, 1.5vw, 12px) clamp(10px, 1.5vw, 12px);
+  }
+}
+
+/* Global Modal Footer Styles */
+.modal-footer {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(163, 177, 198, 0.3);
+}
+
+/* Global Cancel Button - Neumorphism */
+.cancel-btn {
+  width: 100%;
+  background: linear-gradient(145deg, #e6eaee, #f0f4f8);
+  color: #4b5563;
+  border: none;
+  padding: 14px;
+  border-radius: var(--neu-radius-sm, 10px);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: var(--neu-transition, all 0.3s ease);
+  box-shadow: var(--neu-shadow-outer-sm, 4px 4px 8px rgba(163, 177, 198, 0.6), -4px -4px 8px rgba(255, 255, 255, 0.8));
+}
+
+.cancel-btn:hover {
+  background: linear-gradient(145deg, #dde1e7, #e8ecef);
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 12px rgba(163, 177, 198, 0.6), -6px -6px 12px rgba(255, 255, 255, 0.8);
+}
+
+/* Global Submit Button - Neumorphism */
+.submit-btn {
+  width: 100%;
+  background: var(--neu-primary-gradient, linear-gradient(145deg, #3b82f6, #2563eb));
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: var(--neu-radius-sm, 10px);
+  font-weight: 600;
+  font-size: 15px;
+  cursor: pointer;
+  transition: var(--neu-transition, all 0.3s ease);
+  box-shadow: 4px 4px 8px rgba(37, 99, 235, 0.3), -2px -2px 6px rgba(255, 255, 255, 0.2);
+}
+
+.submit-btn:hover {
+  background: linear-gradient(145deg, #2563eb, #1d4ed8);
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 12px rgba(37, 99, 235, 0.4), -3px -3px 8px rgba(255, 255, 255, 0.3);
+}
+
+.submit-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}

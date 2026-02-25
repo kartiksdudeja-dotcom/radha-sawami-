@@ -1,0 +1,128 @@
+.App {
+  width: 100%;
+  min-height: 100vh;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+}
+
+/* Responsive Page Container */
+@media (max-width: 768px) {
+  /* Adjust all page containers for mobile */
+  .members-page,
+  .attendance-page,
+  .branch-container,
+  .seva-page,
+  .member-master-page,
+  .reports-page {
+    padding: clamp(12px, 2.5vw, 20px) clamp(12px, 2.5vw, 15px);
+    margin-left: 0;
+    margin-top: 60px;
+    min-height: calc(100vh - 60px);
+  }
+
+  .members-header h1,
+  .attendance-header h1,
+  .page-header h1,
+  .seva-header h1 {
+    font-size: clamp(1.2rem, 3vw, 1.5rem);
+  }
+
+  .add-new-btn,
+  .refresh-btn,
+  .export-btn {
+    padding: clamp(8px, 1.5vw, 10px) clamp(14px, 2.5vw, 16px);
+    font-size: clamp(0.8rem, 2vw, 0.9rem);
+  }
+}
+
+@media (max-width: 480px) {
+  .members-page,
+  .attendance-page,
+  .branch-container,
+  .seva-page,
+  .member-master-page,
+  .reports-page {
+    padding: clamp(10px, 2vw, 15px) clamp(10px, 2vw, 12px);
+    margin-top: 56px;
+    min-height: calc(100vh - 56px);
+  }
+
+  .members-header,
+  .attendance-header,
+  .page-header {
+    flex-direction: column;
+    gap: clamp(8px, 1.5vw, 10px);
+  }
+
+  .members-header h1,
+  .attendance-header h1,
+  .page-header h1 {
+    font-size: clamp(1.1rem, 2.5vw, 1.3rem);
+  }
+
+  .add-new-btn,
+  .refresh-btn,
+  .export-btn {
+    width: 100%;
+    padding: clamp(10px, 1.5vw, 12px);
+    font-size: clamp(0.75rem, 1.8vw, 0.85rem);
+  }
+
+  /* Stack buttons vertically on very small screens */
+  .header-controls {
+    display: flex;
+    flex-direction: column;
+    gap: clamp(8px, 1.5vw, 10px);
+    width: 100%;
+  }
+
+  /* Make tables scrollable and readable */
+  table {
+    font-size: clamp(0.75rem, 1.8vw, 0.85rem);
+  }
+
+  th, td {
+    padding: clamp(6px, 1vw, 8px) clamp(4px, 1vw, 6px);
+  }
+
+  /* Grid adjustments */
+  .grid-layout {
+    grid-template-columns: 1fr;
+    gap: clamp(10px, 2vw, 15px);
+  }
+
+  /* Card adjustments */
+  .content-card,
+  .attendance-card,
+  .stats-card,
+  .seva-card {
+    padding: clamp(12px, 2vw, 15px);
+    border-radius: 8px;
+  }
+}
+
+/* Hide scrollbars on mobile if needed */
+@media (max-width: 768px) {
+  ::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+  }
+}

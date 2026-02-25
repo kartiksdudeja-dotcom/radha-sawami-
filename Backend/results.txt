@@ -1,0 +1,22 @@
+--- Schema Check ---
+'Seva' columns: SevaId (int), UserID (int), SevaCategory (nvarchar), SevaName (nvarchar), Hours (float), Cost (float), SevaDate (nvarchar), CreatedAt (datetime)
+'SevaMemberInfo' columns: Sr_No (numeric), SevaID (numeric), SCId (numeric), Cumm_Hrs (float), Cumm_Amt (float), Date (nvarchar), UserID (numeric), month (int), year (int)
+
+--- 'Seva' table check ---
+Ratnanjali records in 'Seva': 0
+
+--- 'SevaMemberInfo' table check ---
+Ratnanjali records in 'SevaMemberInfo': 10 (sample)
+{"Sr_No":21,"SevaID":1,"SCId":1,"Cumm_Hrs":0,"Cumm_Amt":0,"Date":"10/12/2023","UserID":4,"month":12,"year":2023,"Name":"Ratnanjali Khanna"}
+{"Sr_No":22,"SevaID":1,"SCId":2,"Cumm_Hrs":0,"Cumm_Amt":0,"Date":"10/12/2023","UserID":4,"month":12,"year":2023,"Name":"Ratnanjali Khanna"}
+{"Sr_No":23,"SevaID":1,"SCId":3,"Cumm_Hrs":0,"Cumm_Amt":0,"Date":"10/12/2023","UserID":4,"month":12,"year":2023,"Name":"Ratnanjali Khanna"}
+{"Sr_No":24,"SevaID":1,"SCId":4,"Cumm_Hrs":0,"Cumm_Amt":0,"Date":"10/12/2023","UserID":4,"month":12,"year":2023,"Name":"Ratnanjali Khanna"}
+{"Sr_No":25,"SevaID":1,"SCId":8,"Cumm_Hrs":0,"Cumm_Amt":0,"Date":"10/12/2023","UserID":4,"month":12,"year":2023,"Name":"Ratnanjali Khanna"}
+{"Sr_No":26,"SevaID":1,"SCId":9,"Cumm_Hrs":0,"Cumm_Amt":0,"Date":"10/12/2023","UserID":4,"month":12,"year":2023,"Name":"Ratnanjali Khanna"}
+{"Sr_No":27,"SevaID":1,"SCId":19,"Cumm_Hrs":0,"Cumm_Amt":0,"Date":"10/12/2023","UserID":4,"month":12,"year":2023,"Name":"Ratnanjali Khanna"}
+{"Sr_No":28,"SevaID":1,"SCId":20,"Cumm_Hrs":5,"Cumm_Amt":0,"Date":"10/12/2023","UserID":4,"month":12,"year":2023,"Name":"Ratnanjali Khanna"}
+{"Sr_No":35,"SevaID":1,"SCId":1,"Cumm_Hrs":0,"Cumm_Amt":0,"Date":"03/12/2023","UserID":4,"month":12,"year":2023,"Name":"Ratnanjali Khanna"}
+{"Sr_No":36,"SevaID":1,"SCId":2,"Cumm_Hrs":0,"Cumm_Amt":0,"Date":"03/12/2023","UserID":4,"month":12,"year":2023,"Name":"Ratnanjali Khanna"}
+
+--- Checking Table Type ---
+'Seva' is a: BASE TABLE

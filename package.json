@@ -1,0 +1,18 @@
+{
+  "name": "radha-swami",
+  "version": "1.0.0",
+  "description": "Radha Swami is a spiritual app and website designed for both mobile and desktop devices with a beautiful, responsive interface.",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3",
+    "jsonwebtoken": "^9.0.3",
+    "msnodesqlv8": "^5.1.3",
+    "mssql": "^12.2.0"
+  }
+}
