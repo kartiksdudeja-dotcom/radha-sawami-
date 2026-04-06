@@ -532,22 +532,26 @@
 /* Responsive Design */
 @media (max-width: 768px) {
   .members-page {
-    padding: 10px 8px;
+    padding: 10px;
   }
 
   .members-header {
     flex-direction: column;
     align-items: stretch;
+    gap: 10px;
+    margin-bottom: 16px;
   }
 
   .members-header h1 {
-    font-size: 1.1rem;
+    font-size: 1.15rem;
   }
 
   .add-new-btn {
     width: 100%;
-    font-size: 0.8rem;
-    padding: 8px 12px;
+    font-size: 0.82rem;
+    padding: 10px 16px;
+    justify-content: center;
+    border-radius: 10px;
   }
 
   .form-grid {
@@ -559,19 +563,22 @@
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
+    padding: 12px;
+    border-radius: 12px;
   }
 
   .search-box {
     flex: 1;
     min-width: unset;
-    font-size: 0.85rem;
-    padding: 8px 10px;
+    font-size: 0.82rem;
+    padding: 8px 12px;
+    border-radius: 10px;
   }
 
   .result-count {
     width: 100%;
     text-align: center;
-    font-size: 0.8rem;
+    font-size: 0.75rem;
   }
 
   .members-grid {
@@ -587,88 +594,95 @@
   .save-btn,
   .cancel-btn {
     width: 100%;
-    font-size: 0.85rem;
+    font-size: 0.82rem;
     padding: 10px;
+    border-radius: 10px;
   }
 
   .member-card {
-    padding: 12px;
+    padding: 0;
+  }
+  
+  .member-header {
+    padding: 12px 14px;
+  }
+  
+  .member-avatar {
+    width: 40px;
+    height: 40px;
+    font-size: 0.95rem;
+  }
+  
+  .member-title h4 {
+    font-size: 0.95rem;
+  }
+  
+  .member-username {
+    font-size: 0.75rem;
+  }
+  
+  .member-details {
+    padding: 12px 14px;
+  }
+  
+  .detail-row {
+    padding: 6px 0;
+    font-size: 0.78rem;
+  }
+  
+  .label {
+    font-size: 0.78rem;
+    min-width: 80px;
+  }
+  
+  .value {
+    font-size: 0.78rem;
+  }
+  
+  .member-actions {
+    padding: 12px 14px;
+    gap: 8px;
+  }
+  
+  .edit-btn, .delete-btn {
+    padding: 8px 14px;
+    font-size: 0.78rem;
+    border-radius: 8px;
   }
 }
 
 @media (max-width: 480px) {
-  .members-page {
-    padding: 10px 8px;
-  }
-
   .members-header h1 {
     font-size: 1.05rem;
   }
-
-  .member-card {
-    padding: 12px;
-  }
-
-  .member-header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-  }
-
-  .member-avatar {
-    width: 40px;
-    height: 40px;
-    font-size: 0.9rem;
-  }
-
-  .member-name {
-    font-size: 0.95rem;
-  }
-
+  
   .member-details {
-    padding: 10px;
-    gap: 8px;
-    font-size: 0.8rem;
+    padding: 10px 12px;
   }
-
+  
   .detail-row {
     flex-direction: column;
     align-items: flex-start;
+    gap: 2px;
   }
-
-  .detail-label {
-    font-size: 0.75rem;
+  
+  .label {
+    min-width: auto;
+    font-size: 0.7rem;
   }
-
-  .detail-value {
-    font-size: 0.8rem;
+  
+  .value {
+    text-align: left;
+    font-size: 0.82rem;
   }
-
+  
   .member-actions {
-    flex-direction: column;
-    gap: 8px;
+    flex-direction: row;
   }
-
-  .edit-btn,
-  .delete-btn {
-    width: 100%;
-    font-size: 0.8rem;
-    padding: 8px 12px;
-  }
-
-  .search-box {
-    font-size: 0.85rem;
-    padding: 8px 10px;
-  }
-
-  .form-group label {
-    font-size: 0.8rem;
-  }
-
-  .form-group input,
-  .form-group select {
-    font-size: 0.85rem;
-    padding: 10px;
+  
+  .edit-btn, .delete-btn {
+    flex: 1;
+    justify-content: center;
   }
 }
 

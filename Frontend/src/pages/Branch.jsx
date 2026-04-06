@@ -198,21 +198,78 @@ const Branch = () => {
     }
   };
 
-  // Add new stat category
-  const addStatCategory = () => {
-    if (
-      newStatCategory.trim() &&
-      !statCategories.includes(newStatCategory.trim())
-    ) {
-      setStatCategories([...statCategories, newStatCategory.trim()]);
-      setNewStatCategory("");
-      setShowAddStatCategory(false);
+  // Add new stat category to Superman Phase Master Database
+  const addStatCategory = async () => {
+    const categoryName = newStatCategory.trim();
+    if (!categoryName) return;
+
+    if (statCategories.includes(categoryName)) {
+      alert("Category already exists!");
+      return;
+    }
+
+    try {
+      const response = await fetch(API_ENDPOINTS.SUPERMAN_PHASES, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phaseName: categoryName }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        setNewStatCategory("");
+        setShowAddStatCategory(false);
+        fetchPhases(); // Refresh list from backend
+      } else {
+        alert("Error adding category: " + result.error);
+      }
+    } catch (error) {
+      console.error("Error saving category to database:", error);
+      alert("Failed to save category. Please try again.");
     }
   };
 
-  // Delete stat category
-  const deleteStatCategory = (categoryToDelete) => {
-    setStatCategories(statCategories.filter((c) => c !== categoryToDelete));
+  // Delete stat category from Superman Phase Master Database
+  const deleteStatCategory = async (categoryToDelete) => {
+    // Cannot delete core categories
+    if (["Initiated", "Jigyasu"].includes(categoryToDelete)) {
+      alert("Core categories cannot be deleted.");
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to delete the category "${categoryToDelete}"?`)) {
+      return;
+    }
+
+    try {
+      // First, get the ID of the phase to delete
+      const phasesRes = await fetch(API_ENDPOINTS.SUPERMAN_PHASES);
+      const phasesResult = await phasesRes.json();
+      
+      if (phasesResult.success) {
+        const phase = phasesResult.data.find(p => p.PhaseName === categoryToDelete);
+        
+        if (phase) {
+          // Delete from database
+          const deleteRes = await fetch(`${API_ENDPOINTS.SUPERMAN_PHASES}/${phase.ID}`, {
+            method: 'DELETE'
+          });
+          
+          const deleteResult = await deleteRes.json();
+          if (deleteResult.success) {
+            fetchPhases(); // Refresh list from backend
+          } else {
+            alert("Error deleting category: " + deleteResult.error);
+          }
+        } else {
+          // Fallback: Just remove from local state if not found in DB
+          setStatCategories(statCategories.filter((c) => c !== categoryToDelete));
+        }
+      }
+    } catch (error) {
+      console.error("Error deleting category:", error);
+      alert("Failed to delete category.");
+    }
   };
 
   // Filter records based on date range, category, time slot, and person name
@@ -740,17 +797,27 @@ const Branch = () => {
                                 {getMemberDetails(member?.id)?.name ||
                                   "Unknown"}
                               </td>
-                              <td>{member?.category || "-"}</td>
-                              <td>{record.shift}</td>
-                              <td>{formatTime(record.time)}</td>
+                              <td>
+                                <span className="category-badge">
+                                  {member?.category || "-"}
+                                </span>
+                              </td>
+                              <td>
+                                <span className={`shift-badge ${record.shift === 'Morning' ? 'morning' : record.shift === 'Evening' ? 'evening' : 'night'}`}>
+                                  {record.shift}
+                                </span>
+                              </td>
+                              <td style={{ fontWeight: "600", color: "var(--text-muted)" }}>
+                                {formatTime(record.time)}
+                              </td>
                               <td>
                                 <button
-                                  className="delete-btn"
+                                  className="delete-record-btn"
                                   onClick={() =>
                                     handleDeleteMember(record.id, member?.id)
                                   }
                                 >
-                                  Delete
+                                  ✕ Remove
                                 </button>
                               </td>
                             </tr>

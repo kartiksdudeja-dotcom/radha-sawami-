@@ -274,29 +274,34 @@ const Reports = ({ initialReport = null }) => {
         {!loading && activeReport === "attendance" && attendanceData.length > 0 && (
           <div className="summary-section">
             <h3 className="summary-title">
-              📋 Satsang Summary
-              {searchMemberName && <span className="summary-filter-badge">"{searchMemberName}" ke liye</span>}
+              📋 Attendance Metrics
+              {searchMemberName && <span className="summary-filter-badge">"{searchMemberName}" filter active</span>}
             </h3>
             <div className="summary-grid">
               <div className="summary-card summary-blue">
                 <span className="summary-count">{attendanceSummary.audio}</span>
                 <span className="summary-label">Audio Satsang</span>
+                <span className="summary-sublabel">Total entries</span>
               </div>
               <div className="summary-card summary-purple">
                 <span className="summary-count">{attendanceSummary.mpg}</span>
                 <span className="summary-label">Video/MPG/DB</span>
+                <span className="summary-sublabel">Total entries</span>
               </div>
               <div className="summary-card summary-green">
                 <span className="summary-count">{attendanceSummary.branch}</span>
                 <span className="summary-label">Branch Satsang</span>
+                <span className="summary-sublabel">Local entries</span>
               </div>
               <div className="summary-card summary-orange">
                 <span className="summary-count">{attendanceSummary.uniqueMembers}</span>
                 <span className="summary-label">Unique Members</span>
+                <span className="summary-sublabel">Distinct participants</span>
               </div>
               <div className="summary-card summary-teal">
                 <span className="summary-count">{attendanceSummary.total}</span>
                 <span className="summary-label">Total Records</span>
+                <span className="summary-sublabel">In this range</span>
               </div>
             </div>
           </div>
@@ -304,8 +309,8 @@ const Reports = ({ initialReport = null }) => {
 
         {!loading && activeReport === "seva" && sevaData.length > 0 && (
           <div className="summary-section">
-            <h3 className="summary-title">📋 Seva Summary
-              {searchMemberName && <span className="summary-filter-badge">"{searchMemberName}" ke liye</span>}
+            <h3 className="summary-title">💪 Seva Metrics
+              {searchMemberName && <span className="summary-filter-badge">"{searchMemberName}" filter active</span>}
             </h3>
             <div className="summary-grid">
               {/* Category-wise cards from real DB data */}
@@ -320,10 +325,12 @@ const Reports = ({ initialReport = null }) => {
               <div className="summary-card summary-teal">
                 <span className="summary-count">{sevaSummary.uniqueMembers}</span>
                 <span className="summary-label">Unique Members</span>
+                <span className="summary-sublabel">Distinct contributors</span>
               </div>
               <div className="summary-card summary-orange">
                 <span className="summary-count">{sevaSummary.totalHours.toFixed(1)}</span>
                 <span className="summary-label">Total Hours</span>
+                <span className="summary-sublabel">Cumulative Seva</span>
               </div>
             </div>
           </div>
@@ -334,9 +341,9 @@ const Reports = ({ initialReport = null }) => {
           <div className="search-status">
             <span className="status-icon">🔍</span>
             <span className="status-text">
-              Search: <strong>"{searchMemberName}"</strong> — {filteredData.length} records mile
+              Showing records for <strong>"{searchMemberName}"</strong> — {filteredData.length} matches found
             </span>
-            <button className="clear-search-btn" onClick={() => setSearchMemberName("")}>✕ Clear</button>
+            <button className="clear-search-btn" onClick={() => setSearchMemberName("")}>✕ Reset Search</button>
           </div>
         )}
 

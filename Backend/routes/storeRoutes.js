@@ -1,89 +1,68 @@
 import express from "express";
 import {
-  // Categories
-  getAllCategories,
-  getCategoryById,
-  createCategory,
-  updateCategory,
-  deleteCategory,
-  // SubCategories
-  getAllSubCategories,
-  getSubCategoriesByCategory,
-  createSubCategory,
-  updateSubCategory,
-  deleteSubCategory,
-  // Products
-  getAllProducts,
-  getProductById,
-  getProductsBySubCategory,
-  getProductsByCategory,
-  searchProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct,
-  updateProductStock,
-  toggleProductStatus,
-  // Cart
-  getCart,
-  addToCart,
-  updateCartItem,
-  removeFromCart,
-  clearCart,
-  // Orders
-  createOrder,
-  getOrderById,
-  getUserOrders,
+  getAllItems,
+  getItemById,
+  createItem,
+  updateItem,
+  deleteItem,
   getAllOrders,
+  getOrderById,
+  createOrder,
   updateOrderStatus,
-  updatePaymentStatus,
-  // Dashboard Stats
-  getStoreStats
+  deleteOrder,
+  getAllSales,
+  createSale,
+  deleteSale,
+  getInventory,
+  updateInventory,
+  getInventorySummary,
+  addItemToCategory,
+  removeItemFromCategory,
+  getItemsByCategory,
+  getAllCategories,
+  createCategory,
+  deleteCategory,
 } from "../controllers/storeController.js";
 
 const router = express.Router();
 
-// ==================== CATEGORIES ====================
-router.get("/categories", getAllCategories);
-router.get("/categories/:id", getCategoryById);
-router.post("/categories", createCategory);
-router.put("/categories/:id", updateCategory);
-router.delete("/categories/:id", deleteCategory);
+// ==================== STORE ITEMS ====================
+router.get("/items", getAllItems);
+router.get("/items/:id", getItemById);
+router.post("/items", createItem);
+router.put("/items/:id", updateItem);
+router.delete("/items/:id", deleteItem);
 
-// ==================== SUB-CATEGORIES ====================
-router.get("/subcategories", getAllSubCategories);
-router.get("/subcategories/category/:categoryId", getSubCategoriesByCategory);
-router.post("/subcategories", createSubCategory);
-router.put("/subcategories/:id", updateSubCategory);
-router.delete("/subcategories/:id", deleteSubCategory);
-
-// ==================== PRODUCTS ====================
-router.get("/products", getAllProducts);
-router.get("/products/search", searchProducts);
-router.get("/products/:id", getProductById);
-router.get("/products/subcategory/:subCategoryId", getProductsBySubCategory);
-router.get("/products/category/:categoryId", getProductsByCategory);
-router.post("/products", createProduct);
-router.put("/products/:id", updateProduct);
-router.delete("/products/:id", deleteProduct);
-router.patch("/products/:id/stock", updateProductStock);
-router.patch("/products/:id/toggle", toggleProductStatus);
-
-// ==================== CART ====================
-router.get("/cart/:userId", getCart);
-router.post("/cart", addToCart);
-router.put("/cart/:cartItemId", updateCartItem);
-router.delete("/cart/:cartItemId", removeFromCart);
-router.delete("/cart/clear/:userId", clearCart);
-
-// ==================== ORDERS ====================
-router.post("/orders", createOrder);
-router.get("/orders/:id", getOrderById);
-router.get("/orders/user/:userId", getUserOrders);
+// ==================== STORE ORDERS ====================
 router.get("/orders", getAllOrders);
-router.patch("/orders/:id/status", updateOrderStatus);
-router.patch("/orders/:id/payment", updatePaymentStatus);
+router.get("/orders/:id", getOrderById);
+router.post("/orders", createOrder);
+router.put("/orders/:id/status", updateOrderStatus);
+router.delete("/orders/:id", deleteOrder);
 
-// ==================== DASHBOARD STATS ====================
-router.get("/stats", getStoreStats);
+// ==================== STORE SALES ====================
+router.get("/sales", getAllSales);
+router.post("/sales", createSale);
+router.delete("/sales/:id", deleteSale);
+
+// ==================== INVENTORY ====================
+router.get("/inventory/:itemId", getInventory);
+router.put("/inventory", updateInventory);
+router.get("/inventory-summary", getInventorySummary);
+
+// ==================== AI-POWERED CATEGORIES ====================
+// AI routes FIRST (before :categoryId parameter routes)
+
+// Then category CRUD routes
+router.get("/categories", getAllCategories);
+router.post("/categories", createCategory);
+router.delete("/categories/:categoryId", deleteCategory);
+
+// Then category-specific routes (with :categoryId parameter)
+router.get("/categories/:categoryId/items", getItemsByCategory);
+
+// Item-category association routes
+router.post("/categories/items/add", addItemToCategory);
+router.post("/categories/items/remove", removeItemFromCategory);
 
 export default router;

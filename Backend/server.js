@@ -5,8 +5,8 @@ import dotenv from "dotenv";
 import path from "path";
 import { fileURLToPath } from "url";
 import { initializeDatabase } from "./config/db.js";
-import { initializePushNotifications } from "./push_notifications.js";
-import notificationRoutes from "./notification_routes.js";
+import { initializePushNotifications } from "./utils/push_notifications.js";
+import notificationRoutes from "./routes/notification_routes.js";
 
 // Import routes
 import authRoutes from "./routes/authRoutes.js";
@@ -14,7 +14,7 @@ import memberRoutes from "./routes/memberRoutes.js";
 import attendanceRoutes from "./routes/attendanceRoutes.js";
 import sevaRoutes from "./routes/sevaRoutes.js";
 import sevaMasterRoutes from "./routes/sevaMasterRoutes.js";
-import storeRoutes from "./routes/storeRoutes-new.js";
+import storeRoutes from "./routes/storeRoutes.js";
 import profileRoutes from "./routes/profileRoutes.js";
 import supermanPhaseRoutes from "./routes/supermanPhaseRoutes.js";
 

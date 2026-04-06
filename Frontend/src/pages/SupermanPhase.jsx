@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "../styles/MemberMaster.css"; // Reuse similar styling
+import "../styles/SupermanPhase.css";
 import { API_ENDPOINTS } from "../config/apiConfig";
 
 const API_URL = API_ENDPOINTS.SUPERMAN_PHASES;
@@ -57,7 +57,6 @@ const SupermanPhase = () => {
   const handleSave = async (e) => {
     e.preventDefault();
     if (!formData.phaseName) {
-      alert("Phase Name is required");
       return;
     }
 
@@ -74,15 +73,11 @@ const SupermanPhase = () => {
 
       const result = await response.json();
       if (result.success) {
-        alert(editingId ? "Phase updated successfully" : "Phase added successfully");
         fetchPhases();
         resetForm();
-      } else {
-        alert("Error: " + result.error);
       }
     } catch (error) {
       console.error("Error saving phase:", error);
-      alert("Failed to save phase");
     } finally {
       setLoading(false);
     }
@@ -97,6 +92,7 @@ const SupermanPhase = () => {
     });
     setEditingId(phase.ID);
     setShowForm(true);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleDelete = async (id) => {
@@ -109,42 +105,41 @@ const SupermanPhase = () => {
       });
       const result = await response.json();
       if (result.success) {
-        alert("Phase deleted successfully");
         fetchPhases();
-      } else {
-        alert("Error: " + result.error);
       }
     } catch (error) {
       console.error("Error deleting phase:", error);
-      alert("Failed to delete phase");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="member-master-page" style={{ padding: '20px' }}>
-      <div className="master-header">
-        <h1>🦸 Superman Phase Master Table</h1>
-        <button 
-          className="add-member-btn" 
-          onClick={() => { resetForm(); setShowForm(true); }}
-          style={{ display: showForm ? 'none' : 'block' }}
-        >
-          Add Superman Phase
-        </button>
+    <div className="superman-phase-container">
+      {/* Header Section */}
+      <div className="phase-header">
+        <div className="header-left">
+          <h1>🦸 Phase Master</h1>
+        </div>
+        {!showForm && (
+          <button className="add-phase-btn" onClick={() => setShowForm(true)}>
+            <span>➕</span> Add New Phase
+          </button>
+        )}
       </div>
 
+      {/* Form Section */}
       {showForm && (
-        <div className="master-form-card expanded" style={{ marginBottom: '30px' }}>
-          <div className="master-header">
-            <h2>{editingId ? "✏️ Edit Phase" : "📝 Add New Phase"}</h2>
-            <button className="close-form-btn" onClick={resetForm}>✕</button>
+        <div className="phase-form-card">
+          <div className="phase-form-header">
+            <h2>{editingId ? "✏️ Edit Phase" : "📝 Create New Phase"}</h2>
+            <button className="close-btn" onClick={resetForm} title="Close Form">✕</button>
           </div>
-          <form onSubmit={handleSave} className="form-content show">
-            <div className="master-form-grid">
+          
+          <form onSubmit={handleSave} className="phase-form">
+            <div className="phase-grid">
               <div className="form-group">
-                <label>Phase Name:</label>
+                <label>Phase Name</label>
                 <input
                   type="text"
                   name="phaseName"
@@ -155,17 +150,17 @@ const SupermanPhase = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Description/Age:</label>
+                <label>Description / Age Group</label>
                 <input
                   type="text"
                   name="description"
                   value={formData.description}
                   onChange={handleInputChange}
-                  placeholder="e.g. Upto 4 yrs"
+                  placeholder="e.g. Children (Upto 4 yrs)"
                 />
               </div>
               <div className="form-group">
-                <label>Min Age:</label>
+                <label>Minimum Age</label>
                 <input
                   type="number"
                   name="minAge"
@@ -175,7 +170,7 @@ const SupermanPhase = () => {
                 />
               </div>
               <div className="form-group">
-                <label>Max Age:</label>
+                <label>Maximum Age</label>
                 <input
                   type="number"
                   name="maxAge"
@@ -184,46 +179,76 @@ const SupermanPhase = () => {
                   min="0"
                 />
               </div>
-              <div className="form-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
-                <button type="submit" className="save-btn" disabled={loading}>
-                  {loading ? "Saving..." : (editingId ? "Update Phase" : "Save Phase")}
-                </button>
-              </div>
+            </div>
+            
+            <div className="phase-form-actions">
+              <button type="submit" className="save-btn" disabled={loading}>
+                {loading ? "Processing..." : (editingId ? "Update Category" : "Build Phase")}
+              </button>
             </div>
           </form>
         </div>
       )}
 
-      <div className="members-list-section">
-        <div className="members-list-header">
+      {/* List Section */}
+      <div className="phases-list-section">
+        <div className="phases-list-header">
           <h2>📊 Configured Phases</h2>
         </div>
-        <div className="members-table-wrapper">
-          <table className="master-table">
+        
+        <div className="table-wrapper">
+          <table className="phase-table">
             <thead>
               <tr>
                 <th>Phase Name</th>
-                <th>Age Group / Description</th>
-                <th>Min Age</th>
-                <th>Max Age</th>
+                <th>Target Group</th>
+                <th>Age Range</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              {phases.length === 0 ? (
+              {loading && phases.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="no-data">No phases configured yet.</td>
+                  <td colSpan="4" className="loading-row">
+                    <p>🔄 Syncing phases...</p>
+                  </td>
+                </tr>
+              ) : phases.length === 0 ? (
+                <tr>
+                  <td colSpan="4">
+                    <div className="empty-state">
+                      <div className="empty-icon">📁</div>
+                      <p>No phases configured. Use the button above to add one.</p>
+                    </div>
+                  </td>
                 </tr>
               ) : (
                 phases.map((phase) => (
                   <tr key={phase.ID}>
-                    <td style={{ fontWeight: '600' }}>{phase.PhaseName}</td>
-                    <td>{phase.Description}</td>
-                    <td>{phase.MinAge} yrs</td>
-                    <td>{phase.MaxAge} yrs</td>
+                    <td className="phase-name">{phase.PhaseName}</td>
+                    <td>{phase.Description || "—"}</td>
+                    <td>
+                      <span className="age-badge">
+                        {phase.MinAge} - {phase.MaxAge} yrs
+                      </span>
+                    </td>
                     <td className="action-cell">
-                      <button className="edit-btn-icon" onClick={() => handleEdit(phase)}>✏️</button>
-                      <button className="delete-btn-icon" onClick={() => handleDelete(phase.ID)}>🗑️</button>
+                      <div className="action-buttons">
+                        <button 
+                          className="icon-btn edit-btn" 
+                          onClick={() => handleEdit(phase)}
+                          title="Edit Phase"
+                        >
+                          ✏️
+                        </button>
+                        <button 
+                          className="icon-btn delete-btn" 
+                          onClick={() => handleDelete(phase.ID)}
+                          title="Delete Phase"
+                        >
+                          🗑️
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))

@@ -26,6 +26,7 @@ export const API_ENDPOINTS = {
   SEVA_MASTER: `${API_BASE_URL}/api/seva-master`,
   SUPERMAN_PHASES: `${API_BASE_URL}/api/superman-phases`,
   HEALTH: `${API_BASE_URL}/api/health`,
+  CHECK_ROLE: `${API_BASE_URL}/api/auth/check-role`,
 };
 
 // Debug logging

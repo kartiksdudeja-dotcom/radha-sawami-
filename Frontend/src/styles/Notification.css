@@ -412,15 +412,119 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .permission-card { flex-direction: column; align-items: stretch; text-align: center; }
-  .permission-icon-wrapper { margin: 0 auto; }
-  .permission-hint { flex-direction: column; text-align: center; }
-  .notification-header { flex-direction: column; align-items: flex-start; }
-  .notification-controls { width: 100%; flex-wrap: wrap; }
-  .push-notify-btn, .refresh-btn { flex: 1; justify-content: center; }
-  .admin-header { flex-direction: column; text-align: center; }
-  .admin-header-icon { margin: 0 auto; }
-  .form-grid { grid-template-columns: 1fr; }
-  .notification-card { flex-direction: column; }
-  .notification-actions { flex-direction: row; justify-content: flex-end; }
+  .notification-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  .header-content h1 {
+    font-size: 1.25rem;
+  }
+  .header-subtitle {
+    font-size: 0.8rem;
+  }
+  
+  .notification-controls {
+    width: 100%;
+    display: flex;
+    gap: 8px;
+  }
+  .push-notify-btn, .refresh-btn {
+    flex: 1;
+    justify-content: center;
+    padding: 8px 12px;
+    font-size: 0.82rem;
+    border-radius: 8px;
+  }
+
+  .permission-card {
+    padding: 14px;
+    gap: 12px;
+  }
+  .permission-icon-wrapper {
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
+  }
+  .permission-icon-wrapper svg {
+    width: 18px;
+    height: 18px;
+  }
+  .permission-title {
+    font-size: 0.95rem;
+  }
+  .permission-desc {
+    font-size: 0.78rem;
+  }
+  .btn-enable, .btn-disable {
+    padding: 8px 14px;
+    font-size: 0.82rem;
+  }
+
+  .admin-card {
+    padding: 16px;
+  }
+  .admin-title {
+    font-size: 1.15rem;
+  }
+  .admin-subtitle {
+    font-size: 0.78rem;
+  }
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+  .form-input, .form-select, .form-textarea {
+    padding: 10px 12px;
+    font-size: 0.88rem;
+  }
+  .submit-btn {
+    padding: 12px;
+    font-size: 0.95rem;
+    width: 100%;
+  }
+
+  .notification-card {
+    padding: 12px;
+    gap: 10px;
+  }
+  .notification-icon-badge {
+    width: 36px;
+    height: 36px;
+  }
+  .notif-title {
+    font-size: 0.92rem;
+  }
+  .notif-message {
+    font-size: 0.82rem;
+  }
+  .notif-time {
+    font-size: 0.7rem;
+  }
+  
+  .notification-actions {
+    flex-direction: row;
+    justify-content: flex-end;
+    gap: 8px;
+    width: 100%;
+    margin-top: 4px;
+  }
+  .action-btn {
+    width: 30px;
+    height: 30px;
+    padding: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .notification-container {
+    padding: 14px;
+  }
+  .header-content h1 {
+    font-size: 1.1rem;
+  }
+  .notifications-list-container {
+    padding: 14px;
+  }
 }

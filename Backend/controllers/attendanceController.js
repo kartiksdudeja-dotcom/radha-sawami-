@@ -95,7 +95,7 @@ export const getAllAttendance = async (req, res) => {
 export const getAttendanceByDate = async (req, res) => {
   try {
     const pool = await getPool();
-    const { date, fromDate, toDate } = req.query;
+    const { date, fromDate, toDate, memberId } = req.query;
 
     // Support both single date and date range
     // Database has mixed formats: DD/MM/YYYY and YYYY-MM-DD
@@ -164,12 +164,11 @@ export const getAttendanceByDate = async (req, res) => {
       console.log(
         `🔍 Date range filter: ${fromDate} to ${toDate} (comparing as ${fromYYYYMMDD} - ${toYYYYMMDD})`
       );
-    } else {
-      return res.status(400).json({
-        success: false,
-        message:
-          "Either 'date' or both 'fromDate' and 'toDate' parameters are required",
-      });
+    }
+
+    if (memberId) {
+      query += ` AND a.UserID = @memberId`;
+      request.input("memberId", sql.Int, memberId);
     }
 
     // Order by date properly using year, month, day columns

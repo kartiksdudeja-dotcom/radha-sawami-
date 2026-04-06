@@ -67,6 +67,16 @@ const sevaData = {
 
 const SevaEntry = ({ categoryId }) => {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [time, setTime] = useState(() => {
+    const now = new Date();
+    return now.toTimeString().slice(0, 5);
+  });
+  const [shift, setShift] = useState(() => {
+    const hour = new Date().getHours();
+    if (hour >= 5 && hour < 12) return "Morning";
+    if (hour >= 12 && hour < 18) return "Evening";
+    return "Night";
+  });
   const [memberName, setMemberName] = useState("");
   const [members, setMembers] = useState([]);
   const [memberHistory, setMemberHistory] = useState(null);
@@ -162,6 +172,12 @@ const SevaEntry = ({ categoryId }) => {
     setTotalMonthlyHours(0);
     setMemberName("");
     setDate(new Date().toISOString().split("T")[0]);
+    const now = new Date();
+    setTime(now.toTimeString().slice(0, 5));
+    const hour = now.getHours();
+    if (hour >= 5 && hour < 12) setShift("Morning");
+    else if (hour >= 12 && hour < 18) setShift("Evening");
+    else setShift("Night");
   }, [categoryId, sevaMasterData, category.name]);
 
   // Close dropdown when clicking outside
@@ -341,6 +357,8 @@ const SevaEntry = ({ categoryId }) => {
             hours: parseFloat(entry.hours) || 0,
             cost: parseFloat(entry.cost) || 0,
             date: date,
+            time: time,
+            shift: shift,
           }),
         });
 
@@ -362,13 +380,19 @@ const SevaEntry = ({ categoryId }) => {
       // Reset form
       setMemberName("");
       setDate(new Date().toISOString().split("T")[0]);
-      setSevaEntries(
-        sevaTypes.map((type, index) => ({
-          id: index + 1,
-          seva: type,
+      const now = new Date();
+      setTime(now.toTimeString().slice(0, 5));
+      const hour = now.getHours();
+      if (hour >= 5 && hour < 12) setShift("Morning");
+      else if (hour >= 12 && hour < 18) setShift("Evening");
+      else setShift("Night");
+      
+      setSevaEntries((prev) => 
+        prev.map((entry) => ({
+          ...entry,
           hours: "",
           cost: "",
-        })),
+        }))
       );
       setTotalMonthlyHours(0);
     } catch (error) {
@@ -429,6 +453,29 @@ const SevaEntry = ({ categoryId }) => {
                 onChange={(e) => setDate(e.target.value)}
                 className="form-input"
               />
+            </div>
+
+            <div className="form-group">
+              <label>Time:</label>
+              <input
+                type="time"
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+                className="form-input"
+              />
+            </div>
+
+            <div className="form-group">
+              <label>Shift:</label>
+              <select
+                value={shift}
+                onChange={(e) => setShift(e.target.value)}
+                className="form-input"
+              >
+                <option value="Morning">Morning</option>
+                <option value="Evening">Evening</option>
+                <option value="Night">Night</option>
+              </select>
             </div>
 
             <div className="form-group member-search">

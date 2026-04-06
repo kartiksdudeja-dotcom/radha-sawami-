@@ -23,6 +23,12 @@ const StoreAdmin = () => {
   const [itemImagePreview, setItemImagePreview] = useState(null);
   const [categoryImage, setCategoryImage] = useState(null);
   const [categoryImagePreview, setCategoryImagePreview] = useState(null);
+  
+  // Search states
+  const [itemSearch, setItemSearch] = useState("");
+  const [orderSearch, setOrderSearch] = useState("");
+  const [salesSearch, setSalesSearch] = useState("");
+  const [inventorySearch, setInventorySearch] = useState("");
 
   // Form states
   const [itemForm, setItemForm] = useState({
@@ -781,7 +787,17 @@ const StoreAdmin = () => {
       {activeTab === "items" && (
         <div className="admin-section">
           <div className="section-header">
-            <h2>📦 Store Items</h2>
+            <div>
+              <h2>📦 Store Items</h2>
+              <div className="search-bar-mini">
+                <input 
+                  type="text" 
+                  placeholder="🔍 Search items..." 
+                  value={itemSearch}
+                  onChange={(e) => setItemSearch(e.target.value)}
+                />
+              </div>
+            </div>
             <button className="add-btn" onClick={() => openModal("item")}>
               + Add Item
             </button>
@@ -802,7 +818,12 @@ const StoreAdmin = () => {
                 </tr>
               </thead>
               <tbody>
-                {items.map((item) => (
+                {items
+                  .filter(item => 
+                    item.ItemName?.toLowerCase().includes(itemSearch.toLowerCase()) ||
+                    item.Category?.toLowerCase().includes(itemSearch.toLowerCase())
+                  )
+                  .map((item) => (
                   <tr key={item.ItemID}>
                     <td>{item.ItemID}</td>
                     <td>
@@ -845,7 +866,12 @@ const StoreAdmin = () => {
           {/* Mobile Card View */}
           <div className="items-cards-container items-table-mobile">
             {items.length > 0 ? (
-              items.map((item) => (
+              items
+                .filter(item => 
+                  item.ItemName?.toLowerCase().includes(itemSearch.toLowerCase()) ||
+                  item.Category?.toLowerCase().includes(itemSearch.toLowerCase())
+                )
+                .map((item) => (
                 <div className="item-card" key={item.ItemID}>
                   <div className="item-card-header">
                     <div className="item-image-wrapper">
@@ -907,7 +933,17 @@ const StoreAdmin = () => {
       {activeTab === "orders" && (
         <div className="admin-section">
           <div className="section-header">
-            <h2>Orders Management</h2>
+            <div>
+              <h2>Orders Management</h2>
+              <div className="search-bar-mini">
+                <input 
+                  type="text" 
+                  placeholder="🔍 Search orders by member..." 
+                  value={orderSearch}
+                  onChange={(e) => setOrderSearch(e.target.value)}
+                />
+              </div>
+            </div>
             <p className="section-subtitle">View and manage all customer orders</p>
           </div>
           
@@ -928,7 +964,12 @@ const StoreAdmin = () => {
               </thead>
               <tbody>
                 {orders.length > 0 ? (
-                  orders.map((order) => {
+                  orders
+                    .filter(order => 
+                      order.MemberName?.toLowerCase().includes(orderSearch.toLowerCase()) ||
+                      order.OrderID?.toString().includes(orderSearch)
+                    )
+                    .map((order) => {
                     const orderItems = order.Items || [];
                     const productNames = orderItems.map(item => item.ItemName || item.Product || 'N/A').join(', ') || 'N/A';
                     const quantities = orderItems.map(item => `${item.Quantity}`).join(', ') || 'N/A';
@@ -977,7 +1018,12 @@ const StoreAdmin = () => {
           {/* Mobile Card Layout */}
           <div className="orders-cards-container orders-table-mobile">
             {orders.length > 0 ? (
-              orders.map((order) => {
+              orders
+                .filter(order => 
+                  order.MemberName?.toLowerCase().includes(orderSearch.toLowerCase()) ||
+                  order.OrderID?.toString().includes(orderSearch)
+                )
+                .map((order) => {
                 const orderItems = order.Items || [];
                 const productNames = orderItems.map(item => item.ItemName || item.Product || 'N/A').join(', ') || 'N/A';
                 const quantities = orderItems.map(item => `${item.Quantity}`).join(', ') || 'N/A';
@@ -1050,7 +1096,17 @@ const StoreAdmin = () => {
       {activeTab === "sales" && (
         <div className="admin-section">
           <div className="section-header">
-            <h2>💳 Sales History</h2>
+            <div>
+              <h2>💳 Sales History</h2>
+              <div className="search-bar-mini">
+                <input 
+                  type="text" 
+                  placeholder="🔍 Search sales by item/member..." 
+                  value={salesSearch}
+                  onChange={(e) => setSalesSearch(e.target.value)}
+                />
+              </div>
+            </div>
             <p className="section-subtitle">View all completed sales transactions</p>
           </div>
           
@@ -1070,7 +1126,13 @@ const StoreAdmin = () => {
               </thead>
               <tbody>
                 {sales.length > 0 ? (
-                  sales.map((sale) => (
+                  sales
+                    .filter(sale => 
+                      sale.ItemName?.toLowerCase().includes(salesSearch.toLowerCase()) ||
+                      sale.MemberName?.toLowerCase().includes(salesSearch.toLowerCase()) ||
+                      sale.SaleID?.toString().includes(salesSearch)
+                    )
+                    .map((sale) => (
                     <tr key={sale.SaleID}>
                       <td>{sale.SaleID}</td>
                       <td>{sale.ItemName || `Item ${sale.ItemID}`}</td>
@@ -1097,7 +1159,13 @@ const StoreAdmin = () => {
           {/* Mobile Card Layout */}
           <div className="sales-cards-container sales-table-mobile">
             {sales.length > 0 ? (
-              sales.map((sale) => (
+              sales
+                .filter(sale => 
+                  sale.ItemName?.toLowerCase().includes(salesSearch.toLowerCase()) ||
+                  sale.MemberName?.toLowerCase().includes(salesSearch.toLowerCase()) ||
+                  sale.SaleID?.toString().includes(salesSearch)
+                )
+                .map((sale) => (
                 <div className="sale-card" key={sale.SaleID}>
                   <div className="sale-card-header">
                     <span className="sale-id">Sale #{sale.SaleID}</span>
@@ -1141,7 +1209,17 @@ const StoreAdmin = () => {
       {activeTab === "inventory" && (
         <div className="admin-section">
           <div className="section-header">
-            <h2>📊 Current Inventory</h2>
+            <div>
+              <h2>📊 Current Inventory</h2>
+              <div className="search-bar-mini">
+                <input 
+                  type="text" 
+                  placeholder="🔍 Search inventory..." 
+                  value={inventorySearch}
+                  onChange={(e) => setInventorySearch(e.target.value)}
+                />
+              </div>
+            </div>
             <p className="section-subtitle">Monitor all store item quantities and stock levels</p>
           </div>
           <div className="inventory-stats">
@@ -1178,7 +1256,12 @@ const StoreAdmin = () => {
               </thead>
               <tbody>
                 {items.length > 0 ? (
-                  items.map((item) => {
+                  items
+                    .filter(item => 
+                      item.ItemName?.toLowerCase().includes(inventorySearch.toLowerCase()) ||
+                      item.Category?.toLowerCase().includes(inventorySearch.toLowerCase())
+                    )
+                    .map((item) => {
                     const qty = item.Quantity || 0;
                     const stockStatus = qty === 0 ? "Out of Stock" : qty < 5 ? "Low Stock" : "In Stock";
                     const statusColor = qty === 0 ? "red" : qty < 5 ? "orange" : "green";
@@ -1212,7 +1295,12 @@ const StoreAdmin = () => {
           {/* Mobile Card View */}
           <div className="inventory-cards-container inventory-table-mobile">
             {items.length > 0 ? (
-              items.map((item) => {
+              items
+                .filter(item => 
+                  item.ItemName?.toLowerCase().includes(inventorySearch.toLowerCase()) ||
+                  item.Category?.toLowerCase().includes(inventorySearch.toLowerCase())
+                )
+                .map((item) => {
                 const qty = item.Quantity || 0;
                 const stockStatus = qty === 0 ? "Out of Stock" : qty < 5 ? "Low Stock" : "In Stock";
                 const statusColor = qty === 0 ? "out-of-stock" : qty < 5 ? "low-stock" : "in-stock";

@@ -8,11 +8,52 @@ export async function getAllItems(req, res) {
   try {
     const pool = await getPool();
     const result = await pool.request().query(`
-      SELECT * FROM StoreItems 
+      SELECT 
+        ItemID,
+        ItemName,
+        Description,
+        Category,
+        Price,
+        Quantity,
+        Unit,
+        IsActive,
+        CreatedDate,
+        UpdatedDate,
+        ImageData
+      FROM StoreItems 
       WHERE IsActive = 1 
       ORDER BY ItemName
     `);
-    res.json({ success: true, data: result.recordset, count: result.recordset.length });
+
+    // Convert binary image data to base64 for frontend
+    const items = result.recordset.map((item) => {
+      if (item.ImageData) {
+        try {
+          // ImageData comes as Buffer from mssql driver
+          if (Buffer.isBuffer(item.ImageData)) {
+            item.ImageData = item.ImageData.toString("base64");
+          } else if (
+            item.ImageData.type === "Buffer" &&
+            Array.isArray(item.ImageData.data)
+          ) {
+            // Handle serialized buffer format
+            item.ImageData = Buffer.from(item.ImageData.data).toString(
+              "base64"
+            );
+          }
+        } catch (e) {
+          console.warn(
+            "Could not convert image data for item",
+            item.ItemID,
+            e.message
+          );
+          item.ImageData = null;
+        }
+      }
+      return item;
+    });
+
+    res.json({ success: true, data: items, count: items.length });
   } catch (error) {
     console.error("Error fetching items:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -23,15 +64,52 @@ export async function getAllItems(req, res) {
 export async function getItemById(req, res) {
   try {
     const pool = await getPool();
-    const result = await pool
-      .request()
-      .input("id", sql.Int, req.params.id)
-      .query("SELECT * FROM StoreItems WHERE ItemID = @id AND IsActive = 1");
+    const result = await pool.request().input("id", sql.Int, req.params.id)
+      .query(`
+        SELECT 
+          ItemID,
+          ItemName,
+          Description,
+          Category,
+          Price,
+          Quantity,
+          Unit,
+          IsActive,
+          CreatedDate,
+          UpdatedDate,
+          ImageData
+        FROM StoreItems 
+        WHERE ItemID = @id AND IsActive = 1
+      `);
 
     if (result.recordset.length === 0) {
       return res.status(404).json({ success: false, error: "Item not found" });
     }
-    res.json({ success: true, data: result.recordset[0] });
+
+    const item = result.recordset[0];
+
+    // Convert binary to base64 if image exists
+    if (item.ImageData) {
+      try {
+        if (Buffer.isBuffer(item.ImageData)) {
+          item.ImageData = item.ImageData.toString("base64");
+        } else if (
+          item.ImageData.type === "Buffer" &&
+          Array.isArray(item.ImageData.data)
+        ) {
+          item.ImageData = Buffer.from(item.ImageData.data).toString("base64");
+        }
+      } catch (e) {
+        console.warn(
+          "Could not convert image data for item",
+          item.ItemID,
+          e.message
+        );
+        item.ImageData = null;
+      }
+    }
+
+    res.json({ success: true, data: item });
   } catch (error) {
     console.error("Error fetching item:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -41,10 +119,21 @@ export async function getItemById(req, res) {
 // Create store item
 export async function createItem(req, res) {
   try {
-    const { ItemName, Description, Category, Price, Quantity, Unit, SupplierID } = req.body;
+    const {
+      ItemName,
+      Description,
+      Category,
+      Price,
+      Quantity,
+      Unit,
+      SupplierID,
+      ImageData,
+    } = req.body;
 
     if (!ItemName || !Price) {
-      return res.status(400).json({ success: false, error: "ItemName and Price are required" });
+      return res
+        .status(400)
+        .json({ success: false, error: "ItemName and Price are required" });
     }
 
     const pool = await getPool();
@@ -57,16 +146,20 @@ export async function createItem(req, res) {
       .input("Quantity", sql.Int, Quantity || 0)
       .input("Unit", sql.NVarChar(50), Unit || null)
       .input("SupplierID", sql.Int, SupplierID || null)
-      .query(`
-        INSERT INTO StoreItems (ItemName, Description, Category, Price, Quantity, Unit, SupplierID)
-        VALUES (@ItemName, @Description, @Category, @Price, @Quantity, @Unit, @SupplierID);
+      .input(
+        "ImageData",
+        sql.VarBinary(sql.MAX),
+        ImageData ? Buffer.from(ImageData, "base64") : null
+      ).query(`
+        INSERT INTO StoreItems (ItemName, Description, Category, Price, Quantity, Unit, SupplierID, ImageData)
+        VALUES (@ItemName, @Description, @Category, @Price, @Quantity, @Unit, @SupplierID, @ImageData);
         SELECT @@IDENTITY as ItemID;
       `);
 
     res.json({
       success: true,
       message: "Item created successfully",
-      ItemID: result.recordset[0].ItemID
+      ItemID: result.recordset[0].ItemID,
     });
   } catch (error) {
     console.error("Error creating item:", error);
@@ -78,23 +171,48 @@ export async function createItem(req, res) {
 export async function updateItem(req, res) {
   try {
     const { id } = req.params;
-    const { ItemName, Description, Category, Price, Quantity, Unit, SupplierID } = req.body;
+    const {
+      ItemName,
+      Description,
+      Category,
+      Price,
+      Quantity,
+      Unit,
+      SupplierID,
+      ImageData,
+    } = req.body;
 
     const pool = await getPool();
+
+    // Check if item exists first
+    const checkResult = await pool
+      .request()
+      .input("ItemID", sql.Int, id)
+      .query("SELECT ItemID FROM StoreItems WHERE ItemID = @ItemID");
+
+    if (checkResult.recordset.length === 0) {
+      return res.status(404).json({ success: false, error: "Item not found" });
+    }
+
     await pool
       .request()
       .input("ItemID", sql.Int, id)
       .input("ItemName", sql.NVarChar(255), ItemName)
-      .input("Description", sql.NVarChar(sql.MAX), Description)
-      .input("Category", sql.NVarChar(100), Category)
+      .input("Description", sql.NVarChar(sql.MAX), Description || null)
+      .input("Category", sql.NVarChar(100), Category || null)
       .input("Price", sql.Decimal(10, 2), Price)
-      .input("Quantity", sql.Int, Quantity)
-      .input("Unit", sql.NVarChar(50), Unit)
-      .input("SupplierID", sql.Int, SupplierID)
-      .query(`
+      .input("Quantity", sql.Int, Quantity || 0)
+      .input("Unit", sql.NVarChar(50), Unit || null)
+      .input("SupplierID", sql.Int, SupplierID || null)
+      .input(
+        "ImageData",
+        sql.VarBinary(sql.MAX),
+        ImageData ? Buffer.from(ImageData, "base64") : null
+      ).query(`
         UPDATE StoreItems 
         SET ItemName = @ItemName, Description = @Description, Category = @Category,
             Price = @Price, Quantity = @Quantity, Unit = @Unit, SupplierID = @SupplierID,
+            ImageData = ISNULL(@ImageData, ImageData),
             UpdatedDate = GETDATE()
         WHERE ItemID = @ItemID
       `);
@@ -109,13 +227,114 @@ export async function updateItem(req, res) {
 // Delete store item
 export async function deleteItem(req, res) {
   try {
+    const { id } = req.params;
     const pool = await getPool();
-    await pool
-      .request()
-      .input("ItemID", sql.Int, req.params.id)
-      .query("UPDATE StoreItems SET IsActive = 0, UpdatedDate = GETDATE() WHERE ItemID = @ItemID");
 
-    res.json({ success: true, message: "Item deleted successfully" });
+    console.log(`\n🗑️  Deleting Item #${id}...`);
+
+    // Verify item exists first
+    const itemCheck = await pool
+      .request()
+      .input("ItemID", sql.Int, id)
+      .query(`SELECT ItemID FROM StoreItems WHERE ItemID = @ItemID`);
+
+    if (itemCheck.recordset.length === 0) {
+      return res.status(404).json({ success: false, error: "Item not found" });
+    }
+
+    console.log(`✓ Item #${id} found, proceeding with deletion`);
+
+    // Delete the item
+    const deleteResult = await pool
+      .request()
+      .input("ItemID", sql.Int, id)
+      .query(`DELETE FROM StoreItems WHERE ItemID = @ItemID`);
+
+    console.log(`✅ Item deleted successfully - Rows affected: ${deleteResult.rowsAffected[0]}`);
+
+    // ✅ Renumber remaining items to avoid gaps
+    console.log(`\n🔄 Renumbering remaining items...`);
+
+    // Get all remaining items sorted by ItemName
+    const remainingItemsResult = await pool.request().query(`
+      SELECT * FROM StoreItems ORDER BY ItemName ASC
+    `);
+    const items = remainingItemsResult.recordset;
+
+    if (items.length > 0) {
+      // Get all order items that reference these items
+      const orderItemsResult = await pool.request().query(`
+        SELECT * FROM StoreOrderItems
+      `);
+      const allOrderItems = orderItemsResult.recordset;
+
+      // Disable constraints
+      await pool.request().query(`ALTER TABLE StoreOrderItems NOCHECK CONSTRAINT ALL`);
+
+      // Delete old items and order items
+      await pool.request().query(`DELETE FROM StoreOrderItems`);
+      await pool.request().query(`DELETE FROM StoreItems`);
+
+      // Reseed IDENTITY to start from 1
+      await pool.request().query(`DBCC CHECKIDENT ('StoreItems', RESEED, 0)`);
+
+      // Build INSERT script with IDENTITY_INSERT for entire batch
+      let insertScript = `SET IDENTITY_INSERT StoreItems ON\n`;
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        const newId = i + 1;
+
+        const itemName = (item.ItemName || '').replace(/'/g, "''");
+        const category = (item.Category || '').replace(/'/g, "''");
+        const description = (item.Description || '').replace(/'/g, "''");
+        const unit = (item.Unit || '').replace(/'/g, "''");
+        const isActive = item.IsActive ? 1 : 0;
+
+        console.log(`  Item ${item.ItemID} → Item ${newId}`);
+        insertScript += `INSERT INTO StoreItems (ItemID, ItemName, Category, Description, Price, Quantity, Unit, SupplierID, IsActive, CreatedDate, UpdatedDate) VALUES (${newId}, '${itemName}', '${category}', '${description}', ${item.Price}, ${item.Quantity}, '${unit}', ${item.SupplierID || 'NULL'}, ${isActive}, '${new Date(item.CreatedDate).toISOString().replace('T', ' ').slice(0, 19)}', '${new Date(item.UpdatedDate).toISOString().replace('T', ' ').slice(0, 19)}')\n`;
+      }
+      insertScript += `SET IDENTITY_INSERT StoreItems OFF\n`;
+
+      await pool.request().query(insertScript);
+
+      // Recreate order items with updated ItemIDs
+      for (const orderItem of allOrderItems) {
+        const oldItemIndex = items.findIndex(o => o.ItemID === orderItem.ItemID);
+        if (oldItemIndex !== -1) {
+          const newItemId = oldItemIndex + 1;
+
+          await pool
+            .request()
+            .input('OrderID', sql.Int, orderItem.OrderID)
+            .input('ItemID', sql.Int, newItemId)
+            .input('Quantity', sql.Int, orderItem.Quantity)
+            .input('UnitPrice', sql.Decimal(10, 2), orderItem.UnitPrice)
+            .input('TotalPrice', sql.Decimal(10, 2), orderItem.TotalPrice)
+            .query(`
+              INSERT INTO StoreOrderItems 
+              (OrderID, ItemID, Quantity, UnitPrice, TotalPrice)
+              VALUES 
+              (@OrderID, @ItemID, @Quantity, @UnitPrice, @TotalPrice)
+            `);
+        }
+      }
+
+      // Re-enable constraints
+      await pool.request().query(`ALTER TABLE StoreOrderItems WITH CHECK CHECK CONSTRAINT ALL`);
+
+      // Reset IDENTITY seed to next number
+      await pool.request().query(`DBCC CHECKIDENT ('StoreItems', RESEED, ${items.length})`);
+    }
+
+    const totalItems = items.length;
+    console.log(`✅ Renumbering complete - Total items: ${totalItems}`);
+    console.log(`📊 Next item ID will be: #${totalItems + 1}`);
+
+    res.json({
+      success: true,
+      message: "Item deleted and remaining items renumbered",
+      totalItems: totalItems
+    });
   } catch (error) {
     console.error("Error deleting item:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -128,20 +347,11 @@ export async function deleteItem(req, res) {
 export async function getAllOrders(req, res) {
   try {
     const pool = await getPool();
-    
     console.log("🔍 Fetching all orders with items...");
     
     // Get all orders with member details
     const orderResult = await pool.request().query(`
-      SELECT 
-        o.OrderID,
-        o.OrderNumber,
-        o.MemberID,
-        o.TotalAmount,
-        o.Status,
-        o.OrderDate,
-        m.Name as MemberName,
-        m.Branch
+      SELECT o.*, m.Name as MemberName, m.Branch
       FROM StoreOrders o
       LEFT JOIN MemberDetails m ON o.MemberID = m.MemberID
       ORDER BY o.OrderDate DESC
@@ -157,8 +367,7 @@ export async function getAllOrders(req, res) {
         oi.Quantity,
         oi.UnitPrice,
         oi.TotalPrice,
-        si.ItemName,
-        si.ItemID
+        si.ItemName
       FROM StoreOrderItems oi
       LEFT JOIN StoreItems si ON oi.ItemID = si.ItemID
       ORDER BY oi.OrderID
@@ -179,7 +388,6 @@ export async function getAllOrders(req, res) {
         UnitPrice: item.UnitPrice,
         TotalPrice: item.TotalPrice
       });
-      console.log(`✅ Item: ${item.ItemName} (Qty: ${item.Quantity}) for Order ${item.OrderID}`);
     });
     
     // Attach items to each order
@@ -189,7 +397,11 @@ export async function getAllOrders(req, res) {
     }));
     
     console.log(`✅ Fetched ${ordersWithItems.length} orders with items`);
-    res.json({ success: true, data: ordersWithItems, count: ordersWithItems.length });
+    res.json({
+      success: true,
+      data: ordersWithItems,
+      count: ordersWithItems.length,
+    });
   } catch (error) {
     console.error("❌ Error fetching orders:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -200,9 +412,7 @@ export async function getAllOrders(req, res) {
 export async function getOrderById(req, res) {
   try {
     const pool = await getPool();
-    const result = await pool
-      .request()
-      .input("id", sql.Int, req.params.id)
+    const result = await pool.request().input("id", sql.Int, req.params.id)
       .query(`
         SELECT o.*, m.Name as MemberName
         FROM StoreOrders o
@@ -215,9 +425,7 @@ export async function getOrderById(req, res) {
     }
 
     const order = result.recordset[0];
-    const itemsResult = await pool
-      .request()
-      .input("id", sql.Int, req.params.id)
+    const itemsResult = await pool.request().input("id", sql.Int, req.params.id)
       .query(`
         SELECT oi.*, si.ItemName, si.Category
         FROM StoreOrderItems oi
@@ -239,28 +447,30 @@ export async function createOrder(req, res) {
     const { MemberID, TotalAmount, Status, Items } = req.body;
 
     if (!MemberID || !Array.isArray(Items) || Items.length === 0) {
-      return res.status(400).json({ success: false, error: "MemberID and Items array are required" });
+      return res
+        .status(400)
+        .json({
+          success: false,
+          error: "MemberID and Items array are required",
+        });
     }
 
     const pool = await getPool();
     const orderNumber = `ORD-${Date.now()}`;
-
-    console.log(`\n📝 Creating order for MemberID: ${MemberID}, Total: ₹${TotalAmount}`);
 
     const result = await pool
       .request()
       .input("OrderNumber", sql.NVarChar(50), orderNumber)
       .input("MemberID", sql.Int, MemberID)
       .input("TotalAmount", sql.Decimal(12, 2), TotalAmount || 0)
-      .input("Status", sql.NVarChar(50), Status || "Pending")
-      .query(`
+      .input("Status", sql.NVarChar(50), Status || "Pending").query(`
         INSERT INTO StoreOrders (OrderNumber, MemberID, TotalAmount, Status)
         VALUES (@OrderNumber, @MemberID, @TotalAmount, @Status);
         SELECT @@IDENTITY as OrderID;
       `);
 
     const OrderID = result.recordset[0].OrderID;
-    console.log(`✅ Order created with ID: ${OrderID}`);
+    console.log(`\n📝 Creating order #${OrderID} for MemberID: ${MemberID}, Total: ₹${TotalAmount}`);
 
     // Insert order items and reduce inventory
     for (const item of Items) {
@@ -273,8 +483,7 @@ export async function createOrder(req, res) {
         .input("ItemID", sql.Int, item.ItemID)
         .input("Quantity", sql.Int, item.Quantity)
         .input("UnitPrice", sql.Decimal(10, 2), item.UnitPrice)
-        .input("TotalPrice", sql.Decimal(12, 2), item.TotalPrice)
-        .query(`
+        .input("TotalPrice", sql.Decimal(12, 2), item.TotalPrice).query(`
           INSERT INTO StoreOrderItems (OrderID, ItemID, Quantity, UnitPrice, TotalPrice)
           VALUES (@OrderID, @ItemID, @Quantity, @UnitPrice, @TotalPrice)
         `);
@@ -290,7 +499,7 @@ export async function createOrder(req, res) {
       const currentQty = checkResult.recordset[0]?.Quantity || 0;
       console.log(`📊 Current inventory: ${currentQty} units`);
 
-      // Reduce inventory quantity - IMPORTANT: Use explicit WHERE clause
+      // Reduce inventory quantity
       const updateQuery = `
         UPDATE StoreItems 
         SET Quantity = Quantity - ${item.Quantity}
@@ -325,10 +534,10 @@ export async function createOrder(req, res) {
       success: true,
       message: "Order created successfully and inventory updated",
       OrderID: OrderID,
-      OrderNumber: orderNumber
+      OrderNumber: orderNumber,
     });
   } catch (error) {
-    console.error("❌ Error creating order:", error);
+    console.error("Error creating order:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 }
@@ -343,8 +552,7 @@ export async function updateOrderStatus(req, res) {
     await pool
       .request()
       .input("OrderID", sql.Int, id)
-      .input("Status", sql.NVarChar(50), Status)
-      .query(`
+      .input("Status", sql.NVarChar(50), Status).query(`
         UPDATE StoreOrders 
         SET Status = @Status, UpdatedDate = GETDATE()
         WHERE OrderID = @OrderID
@@ -353,6 +561,154 @@ export async function updateOrderStatus(req, res) {
     res.json({ success: true, message: "Order status updated successfully" });
   } catch (error) {
     console.error("Error updating order:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+// Delete order (also restores inventory)
+export async function deleteOrder(req, res) {
+  try {
+    const { id } = req.params;
+    const pool = await getPool();
+
+    console.log(`\n🗑️  Deleting Order #${id}...`);
+
+    // Verify order exists first
+    const orderCheck = await pool
+      .request()
+      .input("OrderID", sql.Int, id)
+      .query(`SELECT OrderID FROM StoreOrders WHERE OrderID = @OrderID`);
+
+    if (orderCheck.recordset.length === 0) {
+      return res.status(404).json({ success: false, error: "Order not found" });
+    }
+
+    console.log(`✓ Order #${id} found, proceeding with deletion`);
+
+    // Get order items first to restore inventory
+    const orderItemsResult = await pool
+      .request()
+      .input("OrderID", sql.Int, id)
+      .query(`SELECT ItemID, Quantity FROM StoreOrderItems WHERE OrderID = @OrderID`);
+
+    console.log(`📦 Found ${orderItemsResult.recordset.length} items to restore`);
+
+    // Restore inventory for each item
+    for (const item of orderItemsResult.recordset) {
+      console.log(`📦 Restoring ${item.Quantity} units for ItemID ${item.ItemID}`);
+      
+      const updateResult = await pool
+        .request()
+        .input("ItemID", sql.Int, item.ItemID)
+        .input("Quantity", sql.Int, item.Quantity)
+        .query(`
+          UPDATE StoreItems 
+          SET Quantity = Quantity + @Quantity
+          WHERE ItemID = @ItemID
+        `);
+      
+      console.log(`✅ Inventory restored - Rows affected: ${updateResult.rowsAffected[0]}`);
+    }
+
+    // Delete order items
+    const deleteItemsResult = await pool
+      .request()
+      .input("OrderID", sql.Int, id)
+      .query(`DELETE FROM StoreOrderItems WHERE OrderID = @OrderID`);
+
+    console.log(`✅ Order items deleted - Rows affected: ${deleteItemsResult.rowsAffected[0]}`);
+
+    // Delete order
+    const deleteOrderResult = await pool
+      .request()
+      .input("OrderID", sql.Int, id)
+      .query(`DELETE FROM StoreOrders WHERE OrderID = @OrderID`);
+
+    console.log(`✅ Order deleted successfully - Rows affected: ${deleteOrderResult.rowsAffected[0]}`);
+    
+    // ✅ NEW: Renumber remaining orders to avoid gaps using delete/reinsert
+    console.log(`\n🔄 Renumbering remaining orders...`);
+    
+    // Get all remaining orders with all data
+    const remainingOrdersResult = await pool.request().query(`
+      SELECT * FROM StoreOrders ORDER BY OrderDate ASC
+    `);
+    const orders = remainingOrdersResult.recordset;
+
+    if (orders.length > 0) {
+      // Get all order items
+      const allItemsResult = await pool.request().query(`
+        SELECT * FROM StoreOrderItems ORDER BY OrderID
+      `);
+      const allItems = allItemsResult.recordset;
+
+      // Disable constraints
+      await pool.request().query(`ALTER TABLE StoreOrderItems NOCHECK CONSTRAINT ALL`);
+
+      // Delete old items and orders
+      await pool.request().query(`DELETE FROM StoreOrderItems`);
+      await pool.request().query(`DELETE FROM StoreOrders`);
+
+      // Reseed IDENTITY to start from 1
+      await pool.request().query(`DBCC CHECKIDENT ('StoreOrders', RESEED, 0)`);
+
+      // Build INSERT script with IDENTITY_INSERT for entire batch
+      let insertScript = `SET IDENTITY_INSERT StoreOrders ON\n`;
+      for (let i = 0; i < orders.length; i++) {
+        const order = orders[i];
+        const newId = i + 1;
+        
+        const orderNumber = (order.OrderNumber || '').replace(/'/g, "''");
+        const notes = (order.Notes || '').replace(/'/g, "''");
+        const orderDate = new Date(order.OrderDate).toISOString().replace('T', ' ').slice(0, 19);
+        const createdDate = new Date(order.CreatedDate).toISOString().replace('T', ' ').slice(0, 19);
+        const updatedDate = new Date(order.UpdatedDate).toISOString().replace('T', ' ').slice(0, 19);
+
+        console.log(`  Order ${order.OrderID} → Order ${newId}`);
+        insertScript += `INSERT INTO StoreOrders (OrderID, OrderNumber, MemberID, TotalAmount, Status, OrderDate, Notes, CreatedDate, UpdatedDate) VALUES (${newId}, '${orderNumber}', ${order.MemberID}, ${order.TotalAmount}, '${order.Status}', '${orderDate}', '${notes}', '${createdDate}', '${updatedDate}')\n`;
+      }
+      insertScript += `SET IDENTITY_INSERT StoreOrders OFF\n`;
+
+      await pool.request().query(insertScript);
+
+      // Recreate order items with updated OrderIDs
+      for (const item of allItems) {
+        const oldOrderIndex = orders.findIndex(o => o.OrderID === item.OrderID);
+        const newOrderId = oldOrderIndex + 1;
+
+        await pool
+          .request()
+          .input('OrderID', sql.Int, newOrderId)
+          .input('ItemID', sql.Int, item.ItemID)
+          .input('Quantity', sql.Int, item.Quantity)
+          .input('UnitPrice', sql.Decimal(10, 2), item.UnitPrice)
+          .input('TotalPrice', sql.Decimal(10, 2), item.TotalPrice)
+          .query(`
+            INSERT INTO StoreOrderItems 
+            (OrderID, ItemID, Quantity, UnitPrice, TotalPrice)
+            VALUES 
+            (@OrderID, @ItemID, @Quantity, @UnitPrice, @TotalPrice)
+          `);
+      }
+
+      // Re-enable constraints
+      await pool.request().query(`ALTER TABLE StoreOrderItems WITH CHECK CHECK CONSTRAINT ALL`);
+
+      // Reset IDENTITY seed to next number
+      await pool.request().query(`DBCC CHECKIDENT ('StoreOrders', RESEED, ${orders.length})`);
+    }
+
+    const totalOrders = orders.length;
+    console.log(`✅ Renumbering complete - Total orders: ${totalOrders}`);
+    console.log(`📊 Next order ID will be: #${totalOrders + 1}`);
+    
+    res.json({ 
+      success: true, 
+      message: "Order deleted and remaining orders renumbered",
+      totalOrders: totalOrders
+    });
+  } catch (error) {
+    console.error("❌ Error deleting order:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 }
@@ -370,7 +726,11 @@ export async function getAllSales(req, res) {
       LEFT JOIN StoreItems si ON s.ItemID = si.ItemID
       ORDER BY s.SaleDate DESC
     `);
-    res.json({ success: true, data: result.recordset, count: result.recordset.length });
+    res.json({
+      success: true,
+      data: result.recordset,
+      count: result.recordset.length,
+    });
   } catch (error) {
     console.error("Error fetching sales:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -380,7 +740,15 @@ export async function getAllSales(req, res) {
 // Create sale
 export async function createSale(req, res) {
   try {
-    const { OrderID, ItemID, MemberID, Quantity, UnitPrice, TotalAmount, PaymentStatus } = req.body;
+    const {
+      OrderID,
+      ItemID,
+      MemberID,
+      Quantity,
+      UnitPrice,
+      TotalAmount,
+      PaymentStatus,
+    } = req.body;
 
     const pool = await getPool();
     const result = await pool
@@ -401,10 +769,82 @@ export async function createSale(req, res) {
     res.json({
       success: true,
       message: "Sale recorded successfully",
-      SaleID: result.recordset[0].SaleID
+      SaleID: result.recordset[0].SaleID,
     });
   } catch (error) {
     console.error("Error creating sale:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+// Delete sale
+export async function deleteSale(req, res) {
+  try {
+    const { id } = req.params;
+    const pool = await getPool();
+
+    console.log(`\n🗑️  Deleting Sale #${id}...`);
+
+    // Verify sale exists first
+    const saleCheck = await pool
+      .request()
+      .input("SaleID", sql.Int, id)
+      .query(`SELECT SaleID FROM StoreSales WHERE SaleID = @SaleID`);
+
+    if (saleCheck.recordset.length === 0) {
+      return res.status(404).json({ success: false, error: "Sale not found" });
+    }
+
+    console.log(`✓ Sale #${id} found, proceeding with deletion`);
+
+    // Delete the sale
+    const deleteResult = await pool
+      .request()
+      .input("SaleID", sql.Int, id)
+      .query(`DELETE FROM StoreSales WHERE SaleID = @SaleID`);
+
+    console.log(`✅ Sale deleted successfully - Rows affected: ${deleteResult.rowsAffected[0]}`);
+
+    // ✅ Renumber remaining sales to avoid gaps
+    console.log(`\n🔄 Renumbering remaining sales...`);
+
+    // Get all remaining sales with all data
+    const remainingSalesResult = await pool.request().query(`
+      SELECT * FROM StoreSales ORDER BY SaleID ASC
+    `);
+    const sales = remainingSalesResult.recordset;
+
+    if (sales.length > 0) {
+      // Reseed IDENTITY to start from 1
+      await pool.request().query(`DBCC CHECKIDENT ('StoreSales', RESEED, 0)`);
+
+      // Build INSERT script with IDENTITY_INSERT for entire batch
+      let insertScript = `SET IDENTITY_INSERT StoreSales ON\n`;
+      for (let i = 0; i < sales.length; i++) {
+        const sale = sales[i];
+        const newId = i + 1;
+
+        console.log(`  Sale ${sale.SaleID} → Sale ${newId}`);
+        insertScript += `INSERT INTO StoreSales (SaleID, OrderID, MemberID, TotalAmount, SaleDate, Notes) VALUES (${newId}, ${sale.OrderID}, ${sale.MemberID}, ${sale.TotalAmount}, '${new Date(sale.SaleDate).toISOString().replace('T', ' ').slice(0, 19)}', '${(sale.Notes || '').replace(/'/g, "''")}')\n`;
+      }
+      insertScript += `SET IDENTITY_INSERT StoreSales OFF\n`;
+
+      await pool.request().query(`DELETE FROM StoreSales`);
+      await pool.request().query(insertScript);
+      await pool.request().query(`DBCC CHECKIDENT ('StoreSales', RESEED, ${sales.length})`);
+    }
+
+    const totalSales = sales.length;
+    console.log(`✅ Renumbering complete - Total sales: ${totalSales}`);
+    console.log(`📊 Next sale ID will be: #${totalSales + 1}`);
+
+    res.json({
+      success: true,
+      message: "Sale deleted and remaining sales renumbered",
+      totalSales: totalSales
+    });
+  } catch (error) {
+    console.error("❌ Error deleting sale:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 }
@@ -417,8 +857,7 @@ export async function getInventory(req, res) {
     const pool = await getPool();
     const result = await pool
       .request()
-      .input("ItemID", sql.Int, req.params.itemId)
-      .query(`
+      .input("ItemID", sql.Int, req.params.itemId).query(`
         SELECT si.*, st.ItemName
         FROM StoreInventory si
         LEFT JOIN StoreItems st ON si.ItemID = st.ItemID
@@ -456,7 +895,9 @@ export async function updateInventory(req, res) {
       .request()
       .input("ItemID", sql.Int, ItemID)
       .input("Quantity", sql.Int, newQty)
-      .query("UPDATE StoreItems SET Quantity = @Quantity WHERE ItemID = @ItemID");
+      .query(
+        "UPDATE StoreItems SET Quantity = @Quantity WHERE ItemID = @ItemID"
+      );
 
     // Log transaction
     await pool
@@ -471,7 +912,11 @@ export async function updateInventory(req, res) {
         VALUES (@ItemID, @QuantityIn, @QuantityOut, @CurrentStock, @TransactionType)
       `);
 
-    res.json({ success: true, message: "Inventory updated successfully", newStock: newQty });
+    res.json({
+      success: true,
+      message: "Inventory updated successfully",
+      newStock: newQty,
+    });
   } catch (error) {
     console.error("Error updating inventory:", error);
     res.status(500).json({ success: false, error: error.message });
@@ -495,10 +940,439 @@ export async function getInventorySummary(req, res) {
       WHERE si.IsActive = 1
       ORDER BY si.Quantity ASC
     `);
-    
+
     res.json({ success: true, data: result.recordset });
   } catch (error) {
     console.error("Error fetching inventory summary:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+// ==================== AI-POWERED CATEGORIES ====================
+
+// AI Detection - Suggest categories for items
+export async function suggestCategoriesForItems(req, res) {
+  try {
+    const pool = await getPool();
+    
+    // Get all items without category assignments
+    const result = await pool.request().query(`
+      SELECT DISTINCT 
+        si.ItemID,
+        si.ItemName,
+        si.Description,
+        si.Category as ManualCategory
+      FROM StoreItems si
+      LEFT JOIN StoreCategoryItems sci ON si.ItemID = sci.ItemID
+      WHERE si.IsActive = 1
+      ORDER BY si.ItemName
+    `);
+
+    const items = result.recordset;
+    
+    // AI Logic: Categorize items based on keywords
+    const suggestions = items.map(item => {
+      const itemText = `${item.ItemName} ${item.Description || ''}`.toLowerCase();
+      const categories = detectItemCategories(itemText, item.ManualCategory);
+      
+      return {
+        ItemID: item.ItemID,
+        ItemName: item.ItemName,
+        SuggestedCategories: categories,
+        ManualCategory: item.ManualCategory
+      };
+    });
+
+    res.json({
+      success: true,
+      data: suggestions,
+      count: suggestions.length
+    });
+
+  } catch (error) {
+    console.error("Error suggesting categories:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+// AI Detection Helper - Smart category detection
+function detectItemCategories(itemText, manualCategory) {
+  const categoryKeywords = {
+    'Medicine & Healthcare': [
+      'medicine', 'medical', 'tablet', 'capsule', 'vitamin', 'supplement',
+      'syrup', 'injection', 'bandage', 'antiseptic', 'pain relief', 'fever',
+      'cold', 'cough', 'health', 'healthcare', 'pharmacy', 'doctor', 'hospital'
+    ],
+    'Groceries': [
+      'rice', 'dal', 'flour', 'wheat', 'sugar', 'salt', 'oil', 'ghee',
+      'spice', 'masala', 'dough', 'pulses', 'grains', 'cereals', 'food',
+      'grocery', 'kitchen', 'cooking'
+    ],
+    'Dairy & Eggs': [
+      'milk', 'yogurt', 'cheese', 'butter', 'paneer', 'cream', 'dairy',
+      'egg', 'eggs', 'ghee', 'curd'
+    ],
+    'Fruits & Vegetables': [
+      'apple', 'banana', 'orange', 'mango', 'tomato', 'onion', 'carrot',
+      'potato', 'lettuce', 'spinach', 'fruit', 'vegetable', 'fresh',
+      'produce', 'greens'
+    ],
+    'Snacks & Munchies': [
+      'snack', 'chip', 'biscuit', 'cookie', 'wafer', 'popcorn', 'namkeen',
+      'crisp', 'treat', 'munch', 'ready to eat'
+    ],
+    'Beverages': [
+      'juice', 'drink', 'cola', 'soda', 'tea', 'coffee', 'water', 'shake',
+      'smoothie', 'beverage', 'soft drink', 'energy drink'
+    ],
+    'Personal Care': [
+      'soap', 'shampoo', 'conditioner', 'toothpaste', 'deodorant', 'perfume',
+      'lotion', 'cream', 'face wash', 'skincare', 'haircare', 'personal',
+      'hygiene', 'beauty'
+    ],
+    'Books & Media': [
+      'book', 'magazine', 'novel', 'story', 'journal', 'notebook', 'comic',
+      'educational', 'learning', 'reading'
+    ],
+    'Household Items': [
+      'cleaning', 'detergent', 'dishwash', 'bleach', 'polish', 'broom',
+      'duster', 'cloth', 'household', 'home', 'supplies'
+    ],
+    'Baby Care': [
+      'baby', 'infant', 'diaper', 'formula', 'milk powder', 'toy',
+      'nursery', 'child', 'children', 'kids'
+    ]
+  };
+
+  const detectedCategories = [];
+  const textWords = itemText.split(/\s+/);
+
+  // Check keywords
+  for (const [category, keywords] of Object.entries(categoryKeywords)) {
+    for (const keyword of keywords) {
+      if (itemText.includes(keyword)) {
+        if (!detectedCategories.includes(category)) {
+          detectedCategories.push(category);
+        }
+        break;
+      }
+    }
+  }
+
+  // If no keywords match, use manual category
+  if (detectedCategories.length === 0 && manualCategory) {
+    detectedCategories.push(manualCategory);
+  }
+
+  // Default category if nothing matches
+  if (detectedCategories.length === 0) {
+    detectedCategories.push('General Products');
+  }
+
+  return detectedCategories;
+}
+
+// Auto-generate categories based on all items
+export async function autoGenerateCategories(req, res) {
+  try {
+    const pool = await getPool();
+
+    // Get all items
+    const itemsResult = await pool.request().query(`
+      SELECT ItemID, ItemName, Description, Category
+      FROM StoreItems
+      WHERE IsActive = 1
+    `);
+
+    const items = itemsResult.recordset;
+    const categoriesToCreate = new Set();
+
+    // Detect all categories needed
+    items.forEach(item => {
+      const itemText = `${item.ItemName} ${item.Description || ''}`.toLowerCase();
+      const categories = detectItemCategories(itemText, item.Category);
+      categories.forEach(cat => categoriesToCreate.add(cat));
+    });
+
+    // Get existing categories
+    const existingResult = await pool.request().query(`
+      SELECT CategoryName FROM StoreCategories WHERE IsActive = 1
+    `);
+    const existingCategories = new Set(existingResult.recordset.map(c => c.CategoryName));
+
+    // Create new categories
+    const newCategories = [];
+    const categoryEmojis = {
+      'Medicine & Healthcare': '💊',
+      'Groceries': '🌾',
+      'Dairy & Eggs': '🥛',
+      'Fruits & Vegetables': '🥕',
+      'Snacks & Munchies': '🍿',
+      'Beverages': '🥤',
+      'Personal Care': '🧴',
+      'Books & Media': '📚',
+      'Household Items': '🏠',
+      'Baby Care': '👶',
+      'General Products': '📦'
+    };
+
+    for (const category of categoriesToCreate) {
+      if (!existingCategories.has(category)) {
+        const icon = categoryEmojis[category] || '📦';
+        
+        await pool
+          .request()
+          .input('CategoryName', sql.NVarChar(100), category)
+          .input('CategoryIcon', sql.NVarChar(10), icon)
+          .input('Description', sql.NVarChar(sql.MAX), `Auto-generated: ${category}`)
+          .query(`
+            INSERT INTO StoreCategories (CategoryName, CategoryIcon, Description)
+            VALUES (@CategoryName, @CategoryIcon, @Description)
+          `);
+
+        newCategories.push({ name: category, icon });
+      }
+    }
+
+    res.json({
+      success: true,
+      message: `Created ${newCategories.length} new categories`,
+      newCategories: newCategories,
+      totalCategories: existingCategories.size + newCategories.length
+    });
+
+  } catch (error) {
+    console.error("Error generating categories:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+// Add item to category
+export async function addItemToCategory(req, res) {
+  try {
+    const { ItemID, CategoryID } = req.body;
+
+    if (!ItemID || !CategoryID) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "ItemID and CategoryID are required" 
+      });
+    }
+
+    const pool = await getPool();
+
+    // Check if already exists
+    const checkResult = await pool
+      .request()
+      .input('ItemID', sql.Int, ItemID)
+      .input('CategoryID', sql.Int, CategoryID)
+      .query(`
+        SELECT * FROM StoreCategoryItems 
+        WHERE ItemID = @ItemID AND CategoryID = @CategoryID
+      `);
+
+    if (checkResult.recordset.length > 0) {
+      return res.json({ 
+        success: false, 
+        message: "Item already in this category" 
+      });
+    }
+
+    // Add item to category
+    await pool
+      .request()
+      .input('ItemID', sql.Int, ItemID)
+      .input('CategoryID', sql.Int, CategoryID)
+      .query(`
+        INSERT INTO StoreCategoryItems (ItemID, CategoryID)
+        VALUES (@ItemID, @CategoryID)
+      `);
+
+    res.json({
+      success: true,
+      message: "Item added to category"
+    });
+
+  } catch (error) {
+    console.error("Error adding item to category:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+// Remove item from category
+export async function removeItemFromCategory(req, res) {
+  try {
+    const { ItemID, CategoryID } = req.body;
+
+    if (!ItemID || !CategoryID) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "ItemID and CategoryID are required" 
+      });
+    }
+
+    const pool = await getPool();
+
+    await pool
+      .request()
+      .input('ItemID', sql.Int, ItemID)
+      .input('CategoryID', sql.Int, CategoryID)
+      .query(`
+        DELETE FROM StoreCategoryItems 
+        WHERE ItemID = @ItemID AND CategoryID = @CategoryID
+      `);
+
+    res.json({
+      success: true,
+      message: "Item removed from category"
+    });
+
+  } catch (error) {
+    console.error("Error removing item from category:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+// Get items in a category
+export async function getItemsByCategory(req, res) {
+  try {
+    const { categoryId } = req.params;
+
+    const pool = await getPool();
+
+    const result = await pool
+      .request()
+      .input('CategoryID', sql.Int, categoryId)
+      .query(`
+        SELECT 
+          si.ItemID,
+          si.ItemName,
+          si.Category as ManualCategory,
+          si.Price,
+          si.Quantity,
+          si.Description,
+          sci.CategoryItemID
+        FROM StoreCategoryItems sci
+        JOIN StoreItems si ON sci.ItemID = si.ItemID
+        WHERE sci.CategoryID = @CategoryID
+        ORDER BY si.ItemName
+      `);
+
+    res.json({
+      success: true,
+      data: result.recordset,
+      count: result.recordset.length
+    });
+
+  } catch (error) {
+    console.error("Error fetching category items:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+// Get all categories with item count
+export async function getAllCategories(req, res) {
+  try {
+    const pool = await getPool();
+
+    const result = await pool.request().query(`
+      SELECT 
+        sc.CategoryID,
+        sc.CategoryName,
+        sc.CategoryIcon,
+        sc.Description,
+        COUNT(sci.ItemID) as ItemCount
+      FROM StoreCategories sc
+      LEFT JOIN StoreCategoryItems sci ON sc.CategoryID = sci.CategoryID
+      WHERE sc.IsActive = 1
+      GROUP BY sc.CategoryID, sc.CategoryName, sc.CategoryIcon, sc.Description
+      ORDER BY sc.CategoryName
+    `);
+
+    res.json({
+      success: true,
+      data: result.recordset,
+      count: result.recordset.length
+    });
+
+  } catch (error) {
+    console.error("Error fetching categories:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+// Create category
+export async function createCategory(req, res) {
+  try {
+    const { CategoryName, Description, CategoryIcon } = req.body;
+
+    if (!CategoryName) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "CategoryName is required" 
+      });
+    }
+
+    const pool = await getPool();
+
+    const result = await pool
+      .request()
+      .input('CategoryName', sql.NVarChar(100), CategoryName)
+      .input('Description', sql.NVarChar(sql.MAX), Description || '')
+      .input('CategoryIcon', sql.NVarChar(10), CategoryIcon || '📦')
+      .query(`
+        INSERT INTO StoreCategories (CategoryName, Description, CategoryIcon)
+        OUTPUT INSERTED.CategoryID
+        VALUES (@CategoryName, @Description, @CategoryIcon)
+      `);
+
+    res.json({
+      success: true,
+      message: "Category created",
+      CategoryID: result.recordset[0].CategoryID
+    });
+
+  } catch (error) {
+    if (error.message.includes('Violation of PRIMARY KEY')) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "Category already exists" 
+      });
+    }
+    console.error("Error creating category:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+}
+
+// Delete category
+export async function deleteCategory(req, res) {
+  try {
+    const { categoryId } = req.params;
+
+    if (!categoryId) {
+      return res.status(400).json({ 
+        success: false, 
+        error: "CategoryID is required" 
+      });
+    }
+
+    const pool = await getPool();
+
+    // Delete the category (will cascade delete items in this category)
+    await pool
+      .request()
+      .input('categoryId', sql.Int, categoryId)
+      .query(`
+        DELETE FROM StoreCategories 
+        WHERE CategoryID = @categoryId
+      `);
+
+    res.json({
+      success: true,
+      message: "Category deleted successfully"
+    });
+
+  } catch (error) {
+    console.error("Error deleting category:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 }

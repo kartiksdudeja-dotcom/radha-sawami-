@@ -321,349 +321,217 @@ const MemberMaster = () => {
     }
   };
 
+  const [activeTab, setActiveTab] = useState("personal");
+
   return (
     <div className="member-master-page">
       {/* Header */}
       <div className="master-header">
-        <div className="back-btn">«</div>
+        <div className="back-btn" title="Back to Dashboard" onClick={() => window.location.hash = "#dashboard"}>«</div>
         <h1>Member Master</h1>
       </div>
 
-      {/* Loading Indicator */}
       {loading && (
         <div className="loading-indicator">
-          <p>Loading members...</p>
+          <div className="spinner"></div>
+          <p>Processing...</p>
         </div>
       )}
 
-      {/* Form Card */}
+      {/* Modern Form Card */}
       <div className={`master-form-card ${isFormExpanded ? 'expanded' : 'collapsed'}`}>
-        <div className="master-header" onClick={() => !isFormExpanded && setIsFormExpanded(true)}>
-          <h2
-            style={{
-              margin: 0,
-              color: "#1F2937",
-              fontSize: "1.2rem",
-              fontWeight: "600",
-            }}
-          >
-            {editingId ? '✏️ Edit Member' : '📝 Member Details'}
+        <div className="form-header" onClick={() => !isFormExpanded && setIsFormExpanded(true)}>
+          <h2>
+            {editingId ? '✏️ Edit Member' : '👤 Add New Satsangi'}
+            {!isFormExpanded && <span className="expand-hint">(Click to expand)</span>}
           </h2>
           <div className="header-actions">
             {isFormExpanded && (
-              <button className="close-form-btn" onClick={handleCloseForm} title="Close Form">
+              <button className="back-btn" onClick={handleCloseForm} title="Close Form" style={{width: 32, height: 32, fontSize: '0.9rem'}}>
                 ✕
               </button>
             )}
-            <button className="add-member-btn" onClick={handleAddNew}>
-              + Add New Member
+            <button className="save-btn" onClick={handleAddNew} style={{padding: '8px 16px', fontSize: '0.9rem'}}>
+              + Add New
             </button>
           </div>
         </div>
 
-        <div className={`form-content ${isFormExpanded ? 'show' : 'hide'}`}>
-          <div className="master-form-grid">
-          {/* Row 1 */}
-          <div className="form-group">
-            <label>Branch :</label>
-            <input
-              type="text"
-              name="branch"
-              value={formData.branch}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Region :</label>
-            <input
-              type="text"
-              name="region"
-              value={formData.region}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>UID :</label>
-            <input
-              type="text"
-              name="uid"
-              value={formData.uid}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Initial :</label>
-            <input
-              type="text"
-              name="initial"
-              value={formData.initial}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Name :</label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Gender :</label>
-            <select
-              name="gender"
-              value={formData.gender}
-              onChange={handleInputChange}
-            >
-              <option value="Male">Male</option>
-              <option value="Female">Female</option>
-            </select>
-          </div>
+        {isFormExpanded && (
+          <>
+            <div className="form-tabs">
+              <button 
+                className={`tab-btn ${activeTab === "personal" ? "active" : ""}`}
+                onClick={() => setActiveTab("personal")}
+              >
+                👤 Personal
+              </button>
+              <button 
+                className={`tab-btn ${activeTab === "family" ? "active" : ""}`}
+                onClick={() => setActiveTab("family")}
+              >
+                👨‍👩‍👧 Family
+              </button>
+              <button 
+                className={`tab-btn ${activeTab === "contacts" ? "active" : ""}`}
+                onClick={() => setActiveTab("contacts")}
+              >
+                📞 Contacts
+              </button>
+              <button 
+                className={`tab-btn ${activeTab === "system" ? "active" : ""}`}
+                onClick={() => setActiveTab("system")}
+              >
+                ⚙️ System
+              </button>
+            </div>
 
-          {/* Row 2 */}
-          <div className="form-group">
-            <label>DOB :</label>
-            <input
-              type="date"
-              name="dob"
-              value={formData.dob}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>FirstInitiation :</label>
-            <input
-              type="date"
-              name="first_initiation"
-              value={formData.first_initiation}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>SecondInitiation :</label>
-            <input
-              type="date"
-              name="second_initiation"
-              value={formData.second_initiation}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Jigyasu_Registration :</label>
-            <input
-              type="date"
-              name="jigyasu_registration"
-              value={formData.jigyasu_registration}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Blood_Group :</label>
-            <input
-              type="text"
-              name="blood_group"
-              value={formData.blood_group}
-              onChange={handleInputChange}
-              placeholder="-"
-            />
-          </div>
-          <div className="form-group">
-            <label>Father_Name :</label>
-            <input
-              type="text"
-              name="father_name"
-              value={formData.father_name}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          {/* Row 3 */}
-          <div className="form-group">
-            <label>Mother_Name :</label>
-            <input
-              type="text"
-              name="mother_name"
-              value={formData.mother_name}
-              onChange={handleInputChange}
-              placeholder="-"
-            />
-          </div>
-          <div className="form-group">
-            <label>Husband_Name :</label>
-            <input
-              type="text"
-              name="husband_name"
-              value={formData.husband_name}
-              onChange={handleInputChange}
-              placeholder="-"
-            />
-          </div>
-          <div className="form-group">
-            <label>Wife_Name :</label>
-            <input
-              type="text"
-              name="wife_name"
-              value={formData.wife_name}
-              onChange={handleInputChange}
-              placeholder="-"
-            />
-          </div>
-          <div className="form-group">
-            <label>Office_Bearer :</label>
-            <input
-              type="text"
-              name="office_bearer"
-              value={formData.office_bearer}
-              onChange={handleInputChange}
-              placeholder="-"
-            />
-          </div>
-          <div className="form-group">
-            <label>Email :</label>
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleInputChange}
-              placeholder="Enter email"
-            />
-          </div>
-          <div className="form-group">
-            <label>Phone Number :</label>
-            <input
-              type="tel"
-              name="number"
-              value={formData.number}
-              onChange={handleInputChange}
-              placeholder="Enter phone number"
-            />
-          </div>
-          <div className="form-group">
-            <label>Home Address :</label>
-            <input
-              type="text"
-              name="address"
-              value={formData.address}
-              onChange={handleInputChange}
-              placeholder="Enter home address"
-            />
-          </div>
-          <div className="form-group">
-            <label>Office Address :</label>
-            <input
-              type="text"
-              name="office_address"
-              value={formData.office_address}
-              onChange={handleInputChange}
-              placeholder="Enter office address"
-            />
-          </div>
-          <div className="form-group">
-            <label>UserName :</label>
-            <input
-              type="text"
-              name="username"
-              value={formData.username}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Password :</label>
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          {/* Row 4 */}
-          <div className="form-group">
-            <label>Association_member :</label>
-            <input
-              type="text"
-              name="association_member"
-              value={formData.association_member}
-              onChange={handleInputChange}
-              placeholder="Youth Association"
-            />
-          </div>
-          <div className="form-group">
-            <label>Unit_Member :</label>
-            <input
-              type="text"
-              name="unit_member"
-              value={formData.unit_member}
-              onChange={handleInputChange}
-            />
-          </div>
-          <div className="form-group">
-            <label>Status :</label>
-            <select
-              name="status"
-              value={formData.status}
-              onChange={handleInputChange}
-            >
-              {phases.length > 0 ? (
-                phases.map(p => (
-                  <option key={p.ID} value={p.PhaseName}>{p.PhaseName}</option>
-                ))
-              ) : (
-                <>
-                  <option value="Initiated">Initiated</option>
-                  <option value="Primary">Primary</option>
-                  <option value="PRIMARY 1">PRIMARY 1</option>
-                  <option value="Phase 1">Phase 1</option>
-                  <option value="Children">Children</option>
-                  <option value="Jigyasu">Jigyasu</option>
-                </>
+            <div className="form-content">
+              {activeTab === "personal" && (
+                <div className="tab-pane">
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label>Region :</label>
+                      <input type="text" name="region" value={formData.region} onChange={handleInputChange} placeholder="e.g. North" />
+                    </div>
+                    <div className="form-group">
+                      <label>UID (Unique ID) :</label>
+                      <input type="text" name="uid" value={formData.uid} onChange={handleInputChange} placeholder="System ID" />
+                    </div>
+                    <div className="form-group">
+                      <label>Initial :</label>
+                      <input type="text" name="initial" value={formData.initial} onChange={handleInputChange} placeholder="Br./Sr." />
+                    </div>
+                    <div className="form-group">
+                      <label>Full Name :</label>
+                      <input type="text" name="name" value={formData.name} onChange={handleInputChange} placeholder="Enter name" />
+                    </div>
+                    <div className="form-group">
+                      <label>Gender :</label>
+                      <select name="gender" value={formData.gender} onChange={handleInputChange}>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>Date of Birth :</label>
+                      <input type="date" name="dob" value={formData.dob} onChange={handleInputChange} />
+                    </div>
+                    <div className="form-group">
+                      <label>Blood Group :</label>
+                      <input type="text" name="blood_group" value={formData.blood_group} onChange={handleInputChange} placeholder="A+, B+, etc." />
+                    </div>
+                  </div>
+                </div>
               )}
-            </select>
-          </div>
-          <div className="form-group checkbox-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                name="is_member"
-                checked={formData.is_member}
-                onChange={handleInputChange}
-              />
-              Make Member
-            </label>
-          </div>
-          <div className="form-group checkbox-group">
-            <label className="checkbox-label">
-              <input
-                type="checkbox"
-                name="is_admin"
-                checked={formData.is_admin}
-                onChange={handleInputChange}
-              />
-              Make Admin
-            </label>
-          </div>
-          <div className="form-group">
-            <button
-              className="save-btn"
-              onClick={handleSave}
-              disabled={loading}
-            >
-              {loading ? "Saving..." : "Save"}
-            </button>
-          </div>
-          </div>
-        </div>
+
+              {activeTab === "family" && (
+                <div className="tab-pane">
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label>Father's Name :</label>
+                      <input type="text" name="father_name" value={formData.father_name} onChange={handleInputChange} />
+                    </div>
+                    <div className="form-group">
+                      <label>Mother's Name :</label>
+                      <input type="text" name="mother_name" value={formData.mother_name} onChange={handleInputChange} />
+                    </div>
+                    <div className="form-group">
+                      <label>Husband's Name :</label>
+                      <input type="text" name="husband_name" value={formData.husband_name} onChange={handleInputChange} placeholder="-" />
+                    </div>
+                    <div className="form-group">
+                      <label>Wife's Name :</label>
+                      <input type="text" name="wife_name" value={formData.wife_name} onChange={handleInputChange} placeholder="-" />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "contacts" && (
+                <div className="tab-pane">
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label>Email Address :</label>
+                      <input type="email" name="email" value={formData.email} onChange={handleInputChange} placeholder="member@example.com" />
+                    </div>
+                    <div className="form-group">
+                      <label>Phone Number :</label>
+                      <input type="tel" name="number" value={formData.number} onChange={handleInputChange} placeholder="10-digit number" />
+                    </div>
+                    <div className="form-group" style={{gridColumn: '1 / -1'}}>
+                      <label>Home Address :</label>
+                      <textarea name="address" value={formData.address} onChange={handleInputChange} rows="2" placeholder="Complete residential address"></textarea>
+                    </div>
+                    <div className="form-group" style={{gridColumn: '1 / -1'}}>
+                      <label>Office Address :</label>
+                      <textarea name="office_address" value={formData.office_address} onChange={handleInputChange} rows="2" placeholder="Complete office address"></textarea>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {activeTab === "system" && (
+                <div className="tab-pane">
+                  <div className="form-grid">
+                    <div className="form-group">
+                      <label>Branch :</label>
+                      <input type="text" name="branch" value={formData.branch} onChange={handleInputChange} />
+                    </div>
+                    <div className="form-group">
+                      <label>First Initiation :</label>
+                      <input type="date" name="first_initiation" value={formData.first_initiation} onChange={handleInputChange} />
+                    </div>
+                    <div className="form-group">
+                      <label>Second Initiation :</label>
+                      <input type="date" name="second_initiation" value={formData.second_initiation} onChange={handleInputChange} />
+                    </div>
+                    <div className="form-group">
+                      <label>Status :</label>
+                      <select name="status" value={formData.status} onChange={handleInputChange}>
+                        {phases.map(p => <option key={p.ID} value={p.PhaseName}>{p.PhaseName}</option>)}
+                      </select>
+                    </div>
+                    <div className="form-group">
+                      <label>UserName :</label>
+                      <input type="text" name="username" value={formData.username} onChange={handleInputChange} />
+                    </div>
+                    <div className="form-group">
+                      <label>Password :</label>
+                      <input type="password" name="password" value={formData.password} onChange={handleInputChange} />
+                    </div>
+                    <div className="form-group checkbox-group" style={{flexDirection: 'row', gap: 20}}>
+                      <label className="checkbox-label">
+                        <input type="checkbox" name="is_member" checked={formData.is_member} onChange={handleInputChange} />
+                        Active Member
+                      </label>
+                      <label className="checkbox-label">
+                        <input type="checkbox" name="is_admin" checked={formData.is_admin} onChange={handleInputChange} />
+                        Admin Access
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className="form-actions">
+                <button className="cancel-btn" onClick={handleCloseForm}>Discard</button>
+                <button className="save-btn" onClick={handleSave}>
+                  {loading ? 'Saving...' : (editingId ? 'Update Member' : 'Register Member')}
+                </button>
+              </div>
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Members List Section - Always Visible Below Form */}
+      {/* Members List Section */}
       <div className="members-list-section">
         <div className="members-list-header">
-          <h2>📋 Members List</h2>
-          <span className="member-count">{members.length} members</span>
+          <h2>📋 All Members</h2>
+          <span className="member-count">{members.length} Satsangis</span>
         </div>
 
-        {/* Search Bar */}
         <div className="search-section">
           <div className="search-box">
             <svg className="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -672,29 +540,21 @@ const MemberMaster = () => {
             </svg>
             <input
               type="text"
-              placeholder="Search by name, UID, branch, username..."
+              placeholder="Search members by name, ID or branch..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input"
             />
-            {searchTerm && (
-              <button className="clear-btn" onClick={() => setSearchTerm("")} title="Clear search">
-                ✕
-              </button>
-            )}
           </div>
         </div>
         
-        {/* Desktop Table View */}
         <div className="members-table-wrapper members-table-desktop">
           <table className="master-table">
             <thead>
               <tr>
-                <th>#</th>
+                <th>Member Information</th>
                 <th>UID</th>
-                <th>Member Name</th>
-                <th>Email</th>
-                <th>Phone</th>
+                <th>Contact</th>
                 <th>Branch</th>
                 <th>Gender</th>
                 <th>Status</th>
@@ -702,137 +562,63 @@ const MemberMaster = () => {
               </tr>
             </thead>
             <tbody>
-              {members.filter(member => {
-                const searchLower = searchTerm.toLowerCase();
-                return (
-                  member?.name?.toLowerCase().includes(searchLower) ||
-                  member?.uid?.toLowerCase().includes(searchLower) ||
-                  member?.branch?.toLowerCase().includes(searchLower) ||
-                  member?.region?.toLowerCase().includes(searchLower) ||
-                  member?.username?.toLowerCase().includes(searchLower) ||
-                  member?.gender?.toLowerCase().includes(searchLower) ||
-                  member?.email?.toLowerCase().includes(searchLower) ||
-                  member?.number?.toLowerCase().includes(searchLower)
-                );
-              }).length === 0 ? (
-                <tr>
-                  <td colSpan="9" className="no-data">
-                    {searchTerm ? "No members match your search" : "No members found"}
+              {members.filter(m => 
+                m.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                m.uid?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                m.branch?.toLowerCase().includes(searchTerm.toLowerCase())
+              ).map((member) => (
+                <tr key={member.id}>
+                  <td className="member-info-cell">
+                    <div className="member-name-block">
+                      <span className="member-name">{member.name}</span>
+                      <span className="member-email-small">{member.email}</span>
+                    </div>
+                  </td>
+                  <td className="member-uid-cell">
+                    <span className="uid-badge-table">{member.uid}</span>
+                  </td>
+                  <td>
+                    <div className="member-contact-block">
+                      <span>{member.number}</span>
+                    </div>
+                  </td>
+                  <td>{member.branch}</td>
+                  <td><span className={`gender-badge ${member.gender?.toLowerCase()}`}>{member.gender}</span></td>
+                  <td><span className={`status-badge ${member.status?.toLowerCase().replace(' ', '-')}`}>{member.status}</span></td>
+                  <td className="action-cell">
+                    <button className="back-btn" onClick={() => handleEdit(member)} style={{width: 32, height: 32, fontSize: '0.8rem', marginRight: 8}}>✏️</button>
+                    <button className="back-btn" onClick={() => handleDeleteMember(member.id)} style={{width: 32, height: 32, fontSize: '0.8rem', color: '#f43f5e'}}>🗑️</button>
                   </td>
                 </tr>
-              ) : (
-                members.filter(member => {
-                  const searchLower = searchTerm.toLowerCase();
-                  return (
-                    member?.name?.toLowerCase().includes(searchLower) ||
-                    member?.uid?.toLowerCase().includes(searchLower) ||
-                    member?.branch?.toLowerCase().includes(searchLower) ||
-                    member?.region?.toLowerCase().includes(searchLower) ||
-                    member?.username?.toLowerCase().includes(searchLower) ||
-                    member?.gender?.toLowerCase().includes(searchLower) ||
-                    member?.email?.toLowerCase().includes(searchLower) ||
-                    member?.number?.toLowerCase().includes(searchLower)
-                  );
-                }).map((member, index) => (
-                  <tr key={member?.id || index}>
-                    <td>{index + 1}</td>
-                    <td>{member?.uid || "-"}</td>
-                    <td>{member?.name || "-"}</td>
-                    <td>{member?.email || "-"}</td>
-                    <td>{member?.number || "-"}</td>
-                    <td>{member?.branch || "-"}</td>
-                    <td>
-                      <span className={`gender-badge ${member?.gender?.toLowerCase()}`}>
-                        {member?.gender || "-"}
-                      </span>
-                    </td>
-                    <td>
-                      <span className={`status-badge ${member?.status?.toLowerCase().replace(' ', '-')}`}>
-                        {member?.status || "-"}
-                      </span>
-                    </td>
-                    <td className="action-cell">
-                      <button
-                        className="edit-btn-icon"
-                        onClick={() => handleEdit(member)}
-                        title="Edit"
-                      >
-                        ✏️
-                      </button>
-                      <button
-                        className="delete-btn-icon"
-                        onClick={() => handleDeleteMember(member?.id)}
-                        disabled={loading}
-                        title="Delete"
-                      >
-                        🗑️
-                      </button>
-                    </td>
-                  </tr>
-                ))
-              )}
+              ))}
             </tbody>
           </table>
         </div>
         
-        {/* Mobile Card View */}
-        <div className="members-cards-container members-table-mobile">
-          {members.length === 0 ? (
-            <div className="no-members-card">No members found</div>
-          ) : (
-            members.map((member, index) => (
-              <div className="member-card" key={member?.id || index}>
-                <div className="member-card-header">
-                  <div className="member-header-info">
-                    <h3>{member?.name || "-"}</h3>
-                    <span className="member-uid">ID: {member?.uid || "-"}</span>
-                  </div>
-                  <span className={`member-status-badge ${member?.status?.toLowerCase().replace(' ', '-')}`}>
-                    {member?.status || "-"}
-                  </span>
+        <div className="members-table-mobile">
+          {members.filter(m => 
+            m.name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+            m.uid?.toLowerCase().includes(searchTerm.toLowerCase())
+          ).map((member) => (
+            <div className="member-card" key={member.id}>
+              <div className="member-card-header">
+                <div className="member-title-area">
+                  <h3>{member.name}</h3>
+                  <span className="member-email-card">{member.email}</span>
                 </div>
-
-                <div className="member-card-body">
-                  <div className="member-field">
-                    <label>🏢 Branch</label>
-                    <span>{member?.branch || "-"}</span>
-                  </div>
-                  <div className="member-field">
-                    <label>👤 Gender</label>
-                    <span className={`gender-badge ${member?.gender?.toLowerCase()}`}>
-                      {member?.gender || "-"}
-                    </span>
-                  </div>
-                  <div className="member-field">
-                    <label>📍 Region</label>
-                    <span>{member?.region || "-"}</span>
-                  </div>
-                  <div className="member-field">
-                    <label>🎯 Initial</label>
-                    <span>{member?.initial || "-"}</span>
-                  </div>
-                </div>
-
-                <div className="member-card-actions">
-                  <button
-                    className="edit-btn-card"
-                    onClick={() => handleEdit(member)}
-                    title="Edit"
-                  >
-                    ✏️ Edit
-                  </button>
-                  <button
-                    className="delete-btn-card"
-                    onClick={() => handleDeleteMember(member?.id)}
-                    disabled={loading}
-                    title="Delete"
-                  >
-                    🗑️ Delete
-                  </button>
+                <span className={`status-badge ${member.status?.toLowerCase().replace(' ', '-')}`}>{member.status}</span>
+              </div>
+              <div className="member-card-body">
+                <div className="member-field"><label>ID</label><span className="uid-text">{member.uid}</span></div>
+                <div className="member-field"><label>Phone</label><span>{member.number}</span></div>
+                <div className="member-field"><label>Branch</label><span>{member.branch}</span></div>
+                <div className="member-field card-actions">
+                  <button className="edit-mini-btn" onClick={() => handleEdit(member)}>✏️ Edit</button>
+                  <button className="delete-mini-btn" onClick={() => handleDeleteMember(member.id)}>🗑️</button>
                 </div>
               </div>
-            ))
-          )}
+            </div>
+          ))}
         </div>
       </div>
     </div>

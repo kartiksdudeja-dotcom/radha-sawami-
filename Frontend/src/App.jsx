@@ -5,24 +5,22 @@ import './App.css'
 
 function App() {
   // State to manage authentication and page navigation
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
-
-  // Load user from localStorage on component mount
-  useEffect(() => {
+  // Initialize from localStorage immediately to prevent race conditions
+  const [user, setUser] = useState(() => {
     const storedUser = localStorage.getItem('user');
     if (storedUser) {
       try {
-        const userData = JSON.parse(storedUser);
-        setUser(userData);
-        setIsAuthenticated(true);
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
+        return JSON.parse(storedUser);
+      } catch (e) {
+        console.error('Error parsing stored user:', e);
         localStorage.removeItem('user');
         localStorage.removeItem('is_admin');
       }
     }
-  }, []);
+    return null;
+  });
+
+  const [isAuthenticated, setIsAuthenticated] = useState(!!user);
 
   const handleLogin = (userData) => {
     setUser(userData);

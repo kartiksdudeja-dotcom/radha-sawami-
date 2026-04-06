@@ -517,111 +517,68 @@
 
 /* Responsive Design */
 @media (max-width: 1024px) {
-  .seva-entry-container {
-    padding: 20px;
-  }
-
-  .entry-header {
-    padding: 15px 20px;
-  }
-
-  .entry-content {
-    padding: 20px;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-    gap: 15px;
-  }
-
-  .table-input {
-    width: 80px;
-  }
+  .seva-entry-container { padding: 20px; }
+  .entry-header { padding: 15px 20px; }
+  .entry-content { padding: 20px; }
+  .form-row { grid-template-columns: 1fr; gap: 15px; }
 }
 
 @media (max-width: 768px) {
-  .seva-entry-container {
-    padding: 15px;
-    margin-left: 0;
-  }
-
-  .entry-header {
-    flex-direction: column;
-    text-align: center;
-  }
-
-  .entry-header h1 {
-    font-size: 1.5rem;
-  }
-
-  .entry-content {
-    padding: 15px;
-  }
-
-  .seva-table {
-    font-size: 0.85rem;
-  }
-
-  .seva-table th,
-  .seva-table td {
-    padding: 10px;
-  }
-
-  .table-input {
-    width: 70px;
-    padding: 6px 8px;
-  }
-
-  .btn-submit {
-    padding: 10px 30px;
-    font-size: 0.9rem;
-  }
-
-  .status-info p {
-    flex-direction: column;
-    gap: 5px;
-  }
+  .seva-entry-container { padding: 10px; margin-left: 0; }
+  .entry-header { padding: 12px 16px; gap: 12px; flex-direction: column; text-align: center; }
+  .entry-header h1 { font-size: 1.1rem; }
+  .back-button { font-size: 1.4rem; }
+  .entry-content { padding: 12px; }
+  .status-info { padding-bottom: 10px; margin-bottom: 16px; }
+  .status-info p { font-size: 0.82rem; margin: 6px 0; flex-direction: column; gap: 4px; }
+  .seva-table { font-size: 0.75rem; }
+  .seva-table th { padding: 8px; font-size: 0.75rem; }
+  .seva-table td { padding: 6px 8px; font-size: 0.8rem; }
+  .table-input { width: 65px; padding: 6px; font-size: 0.82rem; }
+  .btn-submit { padding: 10px 24px; font-size: 0.88rem; border-radius: 8px; }
+  .add-row-container { margin: 8px 0; }
+  .btn-add-row { padding: 10px 20px; font-size: 0.88rem; }
 }
 
 @media (max-width: 480px) {
   .seva-entry-container {
-    padding: 10px;
+    padding: 8px;
   }
 
-  .entry-header {
-    padding: 10px 15px;
-  }
-
+  .entry-header { flex-direction: row; text-align: left; padding: 10px; }
   .entry-header h1 {
-    font-size: 1.2rem;
+    font-size: 1.15rem;
   }
 
   .entry-content {
-    padding: 10px;
+    padding: 8px;
   }
 
   .form-row {
-    gap: 10px;
+    gap: 8px;
   }
 
   .seva-table {
-    font-size: 0.8rem;
+    font-size: 0.7rem;
   }
 
   .seva-table th,
   .seva-table td {
-    padding: 8px 5px;
+    padding: 6px 4px;
   }
 
   .table-input {
-    width: 60px;
+    width: 50px;
+    padding: 4px;
+    font-size: 0.75rem;
   }
 
-  .submit-container {
-    flex-direction: column;
-  }
+  .submit-container { margin-top: 16px; flex-direction: column; }
+  .table-container { margin-bottom: 16px; }
 
   .btn-submit {
     width: 100%;
+    padding: 10px;
   }
+  .status-info p { flex-direction: column; gap: 2px; }
 }

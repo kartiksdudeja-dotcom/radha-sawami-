@@ -277,15 +277,15 @@ const Store = () => {
       {/* Notification */}
       {notification && (
         <div className={`store-notification ${notification.type}`}>
-          {notification.message}
+          {notification.type === 'success' ? '✅' : '❌'} {notification.message}
         </div>
       )}
 
-      {/* Header */}
+      {/* Header Section */}
       <div className="store-header">
         <div className="store-header-left">
-          <h1>🏪 RS Store</h1>
-          <p>Quality products for your spiritual needs</p>
+          <h1>🛍️ RS Store</h1>
+          <p>Premium spiritual essentials for your journey</p>
         </div>
         <div className="store-header-right">
           <div className="search-box">
@@ -299,7 +299,7 @@ const Store = () => {
             <button onClick={searchProducts}>🔍</button>
           </div>
           <button className="cart-btn" onClick={() => setShowCart(true)}>
-            🛒 Cart
+            <span>🛒 My Cart</span>
             {calculateCartTotals().totalItems > 0 && (
               <span className="cart-badge">
                 {calculateCartTotals().totalItems}
@@ -330,16 +330,19 @@ const Store = () => {
 
       {/* Items Grid */}
       <div className="products-section">
-        {selectedCategory && (
-          <h2 className="category-title">📦 {selectedCategory}</h2>
-        )}
         {loading ? (
-          <div className="loading-spinner">Loading items...</div>
+          <div className="loading-spinner">
+             <div className="spinner"></div>
+             <span>Loading spiritual items...</span>
+          </div>
         ) : getFilteredItems().length === 0 ? (
           <div className="no-products">
-            {selectedCategory 
-              ? `No items in "${selectedCategory}" category` 
-              : "No items found"}
+            <div className="no-products-icon">🔍</div>
+            <p>
+              {selectedCategory 
+                ? `No items found in "${selectedCategory}" category` 
+                : "No items match your search"}
+            </p>
           </div>
         ) : (
           <div className="products-grid">
@@ -359,7 +362,7 @@ const Store = () => {
                 <div className="product-info">
                   <h3>{item.ItemName}</h3>
                   <p className="product-desc">
-                    {item.Description || "Spiritual item"}
+                    {item.Description || "Quality spiritual item for your daily practice."}
                   </p>
                   <div className="product-price">
                     <span className="current-price">₹{item.Price}</span>
@@ -367,10 +370,10 @@ const Store = () => {
                   <div className="product-stock">
                     {item.Quantity > 0 ? (
                       <span className="in-stock">
-                        ✓ In Stock ({item.Quantity})
+                        🟢 {item.Quantity} in stock
                       </span>
                     ) : (
-                      <span className="out-stock">Out of Stock</span>
+                      <span className="out-stock">🔴 Out of Stock</span>
                     )}
                   </div>
                   <button
@@ -378,9 +381,13 @@ const Store = () => {
                     onClick={() =>
                       addToCart(item.ItemID, item.ItemName, item.Price)
                     }
-                    disabled={item.Quantity === 0}
+                    disabled={item.Quantity <= 0}
                   >
-                    {item.Quantity > 0 ? "+ Add to Cart" : "Out of Stock"}
+                    {item.Quantity > 0 ? (
+                      <><span>+</span> Add to Cart</>
+                    ) : (
+                      "Notify Me"
+                    )}
                   </button>
                 </div>
               </div>
@@ -395,17 +402,17 @@ const Store = () => {
           <div className="cart-sidebar" onClick={(e) => e.stopPropagation()}>
             <div className="cart-header">
               <h2>🛒 Your Cart</h2>
-              <button className="close-btn" onClick={() => setShowCart(false)}>
+              <button className="close-btn" onClick={() => setShowCart(false)} title="Close">
                 ✕
               </button>
             </div>
 
             {cart.length === 0 ? (
-              <div className="empty-cart">
-                <span>🛒</span>
-                <p>Your cart is empty</p>
-                <button onClick={() => setShowCart(false)}>
-                  Continue Shopping
+              <div className="empty-cart-container">
+                <div className="empty-cart-icon">🛒</div>
+                <p>Your cart feels light. Maybe add some items?</p>
+                <button className="continue-shopping-btn" onClick={() => setShowCart(false)}>
+                  Start Shopping
                 </button>
               </div>
             ) : (
@@ -413,11 +420,21 @@ const Store = () => {
                 <div className="cart-items">
                   {cart.map((item) => (
                     <div key={item.ItemID} className="cart-item">
-                      <div className="cart-item-image">📦</div>
+                      <div className="cart-item-image">
+                        {item.ImageData ? (
+                          <img
+                            src={`data:image/jpeg;base64,${item.ImageData}`}
+                            alt={item.ItemName}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '10px' }}
+                          />
+                        ) : (
+                          "📦"
+                        )}
+                      </div>
                       <div className="cart-item-info">
                         <h4>{item.ItemName}</h4>
                         <p className="cart-item-price">
-                          ₹{item.Price} × {item.quantity}
+                          ₹{item.Price}
                         </p>
                         <div className="quantity-controls">
                           <button
@@ -441,6 +458,7 @@ const Store = () => {
                         <p>₹{item.Price * item.quantity}</p>
                         <button
                           className="remove-btn"
+                          title="Remove item"
                           onClick={() => removeFromCart(item.ItemID)}
                         >
                           🗑️
@@ -453,7 +471,7 @@ const Store = () => {
                 <div className="cart-footer">
                   <div className="cart-total">
                     <span>
-                      Total ({calculateCartTotals().totalItems} items)
+                      Total Sum ({calculateCartTotals().totalItems})
                     </span>
                     <span className="total-amount">
                       ₹{calculateCartTotals().totalPrice}
@@ -463,9 +481,9 @@ const Store = () => {
                     className="checkout-btn"
                     onClick={() => setShowCheckout(true)}
                   >
-                    Proceed to Checkout →
+                    Checkout Now ➔
                   </button>
-                  <p className="cod-note">💰 Cash on Delivery Only</p>
+                  <p className="cod-note">✨ Only Cash on Delivery available</p>
                 </div>
               </>
             )}
@@ -481,10 +499,11 @@ const Store = () => {
         >
           <div className="checkout-modal" onClick={(e) => e.stopPropagation()}>
             <div className="checkout-header">
-              <h2>📦 Checkout</h2>
+              <h2>📦 Secure Checkout</h2>
               <button
                 className="close-btn"
                 onClick={() => setShowCheckout(false)}
+                title="Close"
               >
                 ✕
               </button>
@@ -504,7 +523,7 @@ const Store = () => {
                   ))}
                 </div>
                 <div className="summary-total">
-                  <span>Total</span>
+                  <span>Grand Total</span>
                   <span>₹{calculateCartTotals().totalPrice}</span>
                 </div>
               </div>
@@ -512,7 +531,7 @@ const Store = () => {
               <div className="delivery-details">
                 <h3>Delivery Details</h3>
                 <div className="form-group">
-                  <label>Delivery Address *</label>
+                  <label>Full Delivery Address *</label>
                   <textarea
                     value={checkoutForm.deliveryAddress}
                     onChange={(e) =>
@@ -521,13 +540,13 @@ const Store = () => {
                         deliveryAddress: e.target.value,
                       })
                     }
-                    placeholder="Enter complete delivery address"
+                    placeholder="Provide your complete address for delivery"
                     rows="3"
                     required
                   />
                 </div>
                 <div className="form-group">
-                  <label>Phone Number *</label>
+                  <label>Contact Phone Number *</label>
                   <input
                     type="tel"
                     value={checkoutForm.deliveryPhone}
@@ -537,7 +556,7 @@ const Store = () => {
                         deliveryPhone: e.target.value,
                       })
                     }
-                    placeholder="Enter phone number"
+                    placeholder="Enter active phone number"
                     required
                   />
                 </div>
@@ -551,7 +570,7 @@ const Store = () => {
                         specialInstructions: e.target.value,
                       })
                     }
-                    placeholder="Any special delivery instructions"
+                    placeholder="e.g. Leave at the door, call before arrival"
                     rows="2"
                   />
                 </div>
@@ -560,16 +579,16 @@ const Store = () => {
               <div className="payment-method">
                 <h3>Payment Method</h3>
                 <div className="cod-only">
-                  <span>💰</span>
+                  <span className="pay-icon">🤝</span>
                   <div>
-                    <strong>Cash on Delivery</strong>
-                    <p>Pay when your order arrives</p>
+                    <strong>Cash on Delivery (Safe & Secure)</strong>
+                    <p>Pay only when you receive your order</p>
                   </div>
                 </div>
               </div>
 
               <button type="submit" className="place-order-btn">
-                Place Order - ₹{calculateCartTotals().totalPrice}
+                Confirm Order - ₹{calculateCartTotals().totalPrice}
               </button>
             </form>
           </div>

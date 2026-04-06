@@ -121,7 +121,7 @@ export const getSevaReport = async (req, res) => {
         m.Status as status,
         m.Gender as gender,
         m.DOB as dateOfBirth,
-        m.Tittle as title,
+        m.Initital as title,
         m.Association_member as association,
         s.SevaCategory as category,
         s.SevaName as seva_name,
@@ -142,6 +142,11 @@ export const getSevaReport = async (req, res) => {
       request.input("fromDate", sql.NVarChar, fromDate);
       request.input("toDate", sql.NVarChar, toDate);
       console.log(`🔍 Seva date filter: ${fromDate} to ${toDate}`);
+    }
+
+    if (req.query.memberId) {
+      query += ` AND s.UserID = @memberId`;
+      request.input("memberId", sql.Int, req.query.memberId);
     }
 
     query += ` ORDER BY s.SevaDate DESC, s.SevaId DESC`;

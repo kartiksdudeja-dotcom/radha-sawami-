@@ -26,6 +26,7 @@ const Navbar = ({
   const [loadingMembers, setLoadingMembers] = useState(false);
 
   const isAdmin = user?.is_admin === true;
+  const hasAnyAdminPower = isAdmin || user?.can_manage_attendance === true || user?.can_manage_store === true;
   const featuresLocked = !isProfileComplete;
 
   console.log("Navbar user:", user);
@@ -410,7 +411,6 @@ const Navbar = ({
 
         {/* Sidebar Menu */}
         <nav className="sidebar-menu">
-          {/* Profile Completion Warning */}
           {featuresLocked && isMenuOpen && (
             <div className="profile-lock-warning">
               <span className="lock-icon">🔒</span>
@@ -418,447 +418,136 @@ const Navbar = ({
             </div>
           )}
 
-          {/* Profile - Always accessible */}
-          <a
-            href="#profile"
-            className={`menu-item ${activeMenu === "profile" ? "active" : ""} ${featuresLocked ? "highlighted" : ""}`}
-            onClick={() => handleMenuClick("profile")}
-            title="Profile"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
-            </svg>
-            {isMenuOpen && <span>{featuresLocked ? "👤 Complete Profile" : "Profile"}</span>}
-          </a>
-
-          {/* Home - आगला सत्संग (Default Page) */}
-          <a
-            href="#home"
-            className={`menu-item ${
-              activeMenu === "home" || activeMenu === "dashboard" ? "active" : ""
-            } ${featuresLocked ? "locked" : ""}`}
-            onClick={() => handleMenuClick("home")}
-            title={featuresLocked ? "Complete profile first" : "आगला सत्संग"}
-          >
-            {featuresLocked && <span className="lock-badge">🔒</span>}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-              <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            {isMenuOpen && <span>🙏 आगला सत्संग</span>}
-          </a>
-
-
-          {/* Seva - Dropdown Menu */}
-          <a
-            href="#seva"
-            className={`menu-item ${activeMenu.startsWith("seva") ? "active" : ""} ${featuresLocked ? "locked" : ""}`}
-            onClick={handleSevaClick}
-            title={featuresLocked ? "Complete profile first" : "Seva"}
-          >
-            {featuresLocked && <span className="lock-badge">🔒</span>}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
-              <path d="M2 17l10 5 10-5"></path>
-              <path d="M2 12l10 5 10-5"></path>
-            </svg>
-            {isMenuOpen && <span>Seva</span>}
-            {isMenuOpen && (
-              <svg
-                className={`dropdown-arrow ${sevaDropdownOpen ? "open" : ""}`}
-                xmlns="http://www.w3.org/2000/svg"
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            )}
-          </a>
-
-          {sevaDropdownOpen && isMenuOpen && !featuresLocked && (
-            <div className="seva-dropdown">
-              <a
-                href="#seva-entry-mahila"
-                className={`dropdown-item ${
-                  activeMenu === "seva-entry-mahila" ? "active" : ""
-                }`}
-                onClick={() => handleSevaItemClick("mahila")}
-              >
-                👩‍👩‍👧 Mahila Association
-              </a>
-              <a
-                href="#seva-entry-youth"
-                className={`dropdown-item ${
-                  activeMenu === "seva-entry-youth" ? "active" : ""
-                }`}
-                onClick={() => handleSevaItemClick("youth")}
-              >
-                👦👧 Youth Association
-              </a>
-              <a
-                href="#seva-entry-bag"
-                className={`dropdown-item ${
-                  activeMenu === "seva-entry-bag" ? "active" : ""
-                }`}
-                onClick={() => handleSevaItemClick("bag")}
-              >
-                🎒 Bag Unit
-              </a>
-              <a
-                href="#seva-entry-copy"
-                className={`dropdown-item ${
-                  activeMenu === "seva-entry-copy" ? "active" : ""
-                }`}
-                onClick={() => handleSevaItemClick("copy")}
-              >
-                📋 Copy Unit
-              </a>
-            </div>
-          )}
-
-          <a
-            href="#branch"
-            className={`menu-item ${activeMenu === "branch" ? "active" : ""} ${featuresLocked ? "locked" : ""}`}
-            onClick={() => handleMenuClick("branch")}
-            title={featuresLocked ? "Complete profile first" : "Branch"}
-          >
-            {featuresLocked && <span className="lock-badge">🔒</span>}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"></path>
-            </svg>
-            {isMenuOpen && <span>Branch</span>}
-          </a>
-
-          <a
-            href="#events"
-            className={`menu-item ${activeMenu === "events" ? "active" : ""} ${featuresLocked ? "locked" : ""}`}
-            onClick={() => handleMenuClick("events")}
-            title={featuresLocked ? "Complete profile first" : "Events"}
-          >
-            {featuresLocked && <span className="lock-badge">🔒</span>}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-              <line x1="16" y1="2" x2="16" y2="6"></line>
-              <line x1="8" y1="2" x2="8" y2="6"></line>
-              <line x1="3" y1="10" x2="21" y2="10"></line>
-            </svg>
-            {isMenuOpen && <span>Events</span>}
-          </a>
-
-          <a
-            href="#store"
-            className={`menu-item ${activeMenu === "store" ? "active" : ""} ${featuresLocked ? "locked" : ""}`}
-            onClick={() => handleMenuClick("store")}
-            title={featuresLocked ? "Complete profile first" : "Store"}
-          >
-            {featuresLocked && <span className="lock-badge">🔒</span>}
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
-              <polyline points="9 22 9 12 15 12 15 22"></polyline>
-            </svg>
-            {isMenuOpen && <span>Store</span>}
-          </a>
-
-          {isAdmin && !featuresLocked && (
+          {/* 1. Main Features */}
+          <div className="menu-group">
             <a
-              href="#master-tables"
-              className={`menu-item ${
-                [
-                  "member-master",
-                  "satsang-options",
-                  "seva-options",
-                  "superman-phase",
-                  "store-admin",
-                  "admin-master",
-                ].includes(activeMenu)
-                  ? "active"
-                  : ""
-              }`}
-              onClick={handleMasterTablesClick}
-              title="Master Tables"
+              href="#home"
+              className={`menu-item ${activeMenu === "home" || activeMenu === "dashboard" ? "active" : ""} ${featuresLocked ? "locked" : ""}`}
+              onClick={() => handleMenuClick("home")}
+              title="Home"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M4 6h16M4 12h16M4 18h16"></path>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              {isMenuOpen && <span>Master Tables</span>}
-              {isMenuOpen && (
-                <svg
-                  className={`dropdown-arrow ${
-                    masterTablesDropdownOpen ? "open" : ""
-                  }`}
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <polyline points="6 9 12 15 18 9"></polyline>
+              {isMenuOpen && <span>🙏 आगला सत्संग</span>}
+              {featuresLocked && <span className="lock-badge">🔒</span>}
+            </a>
+
+            <a
+              href="#store"
+              className={`menu-item ${activeMenu === "store" ? "active" : ""} ${featuresLocked ? "locked" : ""}`}
+              onClick={() => handleMenuClick("store")}
+              title="Store"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {isMenuOpen && <span>🛒 Canteen Store</span>}
+              {featuresLocked && <span className="lock-badge">🔒</span>}
+            </a>
+
+            <a
+              href="#notifications"
+              className={`menu-item ${activeMenu === "notifications" ? "active" : ""} ${featuresLocked ? "locked" : ""}`}
+              onClick={() => handleMenuClick("notifications")}
+              title="Notifications"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              {isMenuOpen && <span>Notifications</span>}
+              {featuresLocked && <span className="lock-badge">🔒</span>}
+            </a>
+          </div>
+
+
+          <div className="menu-divider" style={{height: '1px', background: 'var(--sidebar-border)', margin: '8px 16px', opacity: 0.5}}></div>
+
+          {/* 2. Admin Features - Shown if user has any admin power */}
+          {hasAnyAdminPower && (
+            <div className="menu-group admin-group">
+              <a
+                href="#branch"
+                className={`menu-item ${activeMenu === "branch" ? "active" : ""}`}
+                onClick={() => handleMenuClick("branch")}
+                title="Branch Info"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5m4 0v-3a1 1 0 011-1h2a1 1 0 011 1v3m-4 0h4" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-              )}
-            </a>
-          )}
+                {isMenuOpen && <span>Branch Info</span>}
+              </a>
 
-          {masterTablesDropdownOpen && isMenuOpen && !featuresLocked && isAdmin && (
-            <div className="seva-dropdown">
               <a
-                href="#member-master"
-                className={`dropdown-item ${
-                  activeMenu === "member-master" ? "active" : ""
-                }`}
-                onClick={() => handleMasterTableItemClick("member-master")}
+                href="#master-tables"
+                className={`menu-item ${["member-master", "satsang-options", "seva-options", "superman-phase", "store-admin", "admin-master"].includes(activeMenu) ? "active" : ""}`}
+                onClick={handleMasterTablesClick}
+                title="Master Settings"
               >
-                👤 Add New Satsangi
-              </a>
-              <a
-                href="#satsang-options"
-                className={`dropdown-item ${
-                  activeMenu === "satsang-options" ? "active" : ""
-                }`}
-                onClick={() => handleMasterTableItemClick("satsang-options")}
-              >
-                🙏 Add Satsang Options
-              </a>
-              <a
-                href="#seva-options"
-                className={`dropdown-item ${
-                  activeMenu === "seva-options" ? "active" : ""
-                }`}
-                onClick={() => handleMasterTableItemClick("seva-options")}
-              >
-                🙌 Add Seva options
-              </a>
-              <a
-                href="#superman-phase"
-                className={`dropdown-item ${
-                  activeMenu === "superman-phase" ? "active" : ""
-                }`}
-                onClick={() => handleMasterTableItemClick("superman-phase")}
-              >
-                🦸 Add Superman Phase
-              </a>
-              <a
-                href="#store-admin"
-                className={`dropdown-item ${
-                  activeMenu === "store-admin" ? "active" : ""
-                }`}
-                onClick={() => handleMasterTableItemClick("store-admin")}
-              >
-                🛒 Add Store Items
-              </a>
-              <a
-                href="#admin-master"
-                className={`dropdown-item ${
-                  activeMenu === "admin-master" ? "active" : ""
-                }`}
-                onClick={() => handleMasterTableItemClick("admin-master")}
-              >
-                🔑 Add Admins
-              </a>
-            </div>
-          )}
-
-          {isAdmin && !featuresLocked && (
-            <a
-              href="#reports"
-              className={`menu-item ${
-                activeMenu.startsWith("report") ? "active" : ""
-              }`}
-              onClick={handleReportsClick}
-              title="Reports"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <line x1="12" y1="2" x2="12" y2="22"></line>
-                <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
-              </svg>
-              {isMenuOpen && <span>Reports</span>}
-              {isMenuOpen && (
-                <svg
-                  className={`dropdown-arrow ${
-                    reportsDropdownOpen ? "open" : ""
-                  }`}
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                >
-                  <polyline points="6 9 12 15 18 9"></polyline>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-              )}
-            </a>
-          )}
+                {isMenuOpen && <span>Master Settings</span>}
+                {isMenuOpen && <svg className={`dropdown-arrow ${masterTablesDropdownOpen ? "open" : ""}`} viewBox="0 0 24 24" style={{width: '16px', height: '16px'}}><path d="M19 9l-7 7-7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
+              </a>
 
-          {reportsDropdownOpen && isMenuOpen && !featuresLocked && (
-            <div className="seva-dropdown">
+              {masterTablesDropdownOpen && isMenuOpen && (
+                <div className="seva-dropdown">
+                  {(isAdmin || user?.can_manage_attendance) && <a href="#member-master" className={`dropdown-item ${activeMenu === "member-master" ? "active" : ""}`} onClick={() => handleMasterTableItemClick("member-master")}>👤 Members Database</a>}
+                  {(isAdmin || user?.can_manage_attendance) && <a href="#satsang-options" className={`dropdown-item ${activeMenu === "satsang-options" ? "active" : ""}`} onClick={() => handleMasterTableItemClick("satsang-options")}>🙏 Satsang Setup</a>}
+                  {(isAdmin || user?.can_manage_attendance) && <a href="#seva-options" className={`dropdown-item ${activeMenu === "seva-options" ? "active" : ""}`} onClick={() => handleMasterTableItemClick("seva-options")}>🙌 Seva Setup</a>}
+                  {isAdmin && <a href="#superman-phase" className={`dropdown-item ${activeMenu === "superman-phase" ? "active" : ""}`} onClick={() => handleMasterTableItemClick("superman-phase")}>🦸 Superman Setup</a>}
+                  {(isAdmin || user?.can_manage_store) && <a href="#store-admin" className={`dropdown-item ${activeMenu === "store-admin" ? "active" : ""}`} onClick={() => handleMasterTableItemClick("store-admin")}>🛒 Canteen Setup</a>}
+                  {isAdmin && <a href="#admin-master" className={`dropdown-item ${activeMenu === "admin-master" ? "active" : ""}`} onClick={() => handleMasterTableItemClick("admin-master")}>🔑 Admin Roles</a>}
+                </div>
+              )}
+
               <a
-                href="#report-attendance"
-                className={`dropdown-item ${
-                  activeMenu === "report-attendance" ? "active" : ""
-                }`}
-                onClick={() => handleReportItemClick("attendance")}
+                href="#reports"
+                className={`menu-item ${activeMenu.startsWith("report") ? "active" : ""}`}
+                onClick={handleReportsClick}
+                title="Reports & Analytics"
               >
-                📊 Attendance Report
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                  <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {isMenuOpen && <span>All Reports</span>}
+                {isMenuOpen && <svg className={`dropdown-arrow ${reportsDropdownOpen ? "open" : ""}`} viewBox="0 0 24 24" style={{width: '16px', height: '16px'}}><path d="M19 9l-7 7-7-7" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>}
               </a>
-              <a
-                href="#report-seva"
-                className={`dropdown-item ${
-                  activeMenu === "report-seva" ? "active" : ""
-                }`}
-                onClick={() => handleReportItemClick("seva")}
-              >
-                📋 Seva Entry Report
-              </a>
+
+              {reportsDropdownOpen && isMenuOpen && (
+                <div className="seva-dropdown">
+                  <a href="#report-attendance" className={`dropdown-item ${activeMenu === "report-attendance" ? "active" : ""}`} onClick={() => handleReportItemClick("attendance")}>📊 Attendance Analytics</a>
+                  <a href="#report-seva" className={`dropdown-item ${activeMenu === "report-seva" ? "active" : ""}`} onClick={() => handleReportItemClick("seva")}>📋 Seva Logs</a>
+                </div>
+              )}
+
+              {isAdmin && !featuresLocked && (
+                <a
+                  href="#login"
+                  className="menu-item login-as-member"
+                  onClick={(e) => { e.preventDefault(); handleLoginAsClick(); }}
+                  title="Switch User (Admin Only)"
+                >
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="admin-login-svg">
+                    <path d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                  {isMenuOpen && <span className="admin-login-text">Login as Member</span>}
+
+                </a>
+              )}
             </div>
           )}
-
-          {/* Login - Admin Feature */}
-          {!featuresLocked && (
-            <a
-              href="#login"
-              className={`menu-item login-as-member ${
-                isAdmin ? "" : "admin-only"
-              }`}
-              onClick={(e) => {
-                e.preventDefault();
-                if (isAdmin) {
-                  handleLoginAsClick();
-                } else {
-                  alert("⚠️ This feature is only available for admin users");
-                }
-              }}
-              title="Login (Admin Only)"
-              style={{
-                opacity: isAdmin ? 1 : 0.5,
-                cursor: isAdmin ? "pointer" : "not-allowed",
-              }}
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path>
-                <polyline points="10 17 15 12 10 7"></polyline>
-                <line x1="15" y1="12" x2="3" y2="12"></line>
-              </svg>
-              {isMenuOpen && <span>🔑 Login {!isAdmin && "(Admin)"}</span>}
-            </a>
-          )}
-
-          {/* Notification */}
-          <a
-            href="#notifications"
-            className={`menu-item ${
-              activeMenu === "notifications" ? "active" : ""
-            } ${featuresLocked ? "locked" : ""}`}
-            onClick={() => handleMenuClick("notifications")}
-            title={featuresLocked ? "Complete profile first" : "Notifications"}
-          >
-            {featuresLocked && <span className="lock-badge">🔒</span>}
-            <img
-              src={notificationIcon}
-              alt="Notification"
-              className="notification-icon"
-              style={{ width: "24px", height: "24px" }}
-            />
-            {isMenuOpen && <span>Notifications</span>}
-          </a>
         </nav>
 
         {/* Sidebar Footer */}
         <div className="sidebar-footer">
           {isAppInstalled && (
-            <div className="menu-item app-installed" title="App Installed">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+            <div className="menu-item app-installed" title="App Ready">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              {isMenuOpen && <span>✅ App Installed</span>}
+              {isMenuOpen && <span>App Installed</span>}
             </div>
           )}
 
@@ -866,24 +555,13 @@ const Navbar = ({
             <a
               href="#stop-impersonating"
               className="menu-item stop-impersonating"
-              onClick={(e) => {
-                e.preventDefault();
-                handleStopImpersonating();
-              }}
-              title="Stop Impersonating"
+              onClick={(e) => { e.preventDefault(); handleStopImpersonating(); }}
+              title="Stop Access"
             >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="24"
-                height="24"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-              >
-                <path d="M9 3H5a2 2 0 0 0-2 2v4m11-6h4a2 2 0 0 1 2 2v4M9 21H5a2 2 0 0 1-2-2v-4m11 6h4a2 2 0 0 0 2-2v-4M9 9h6m-6 6h6"></path>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              {isMenuOpen && <span>↩️ Stop Impersonating</span>}
+              {isMenuOpen && <span>Stop Access</span>}
             </a>
           )}
 
@@ -893,44 +571,25 @@ const Navbar = ({
             onClick={() => handleMenuClick("profile")}
             title="Profile"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-              <circle cx="12" cy="7" r="4"></circle>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            {isMenuOpen && <span>Profile</span>}
+            {isMenuOpen && <span>{featuresLocked ? "Complete Profile" : "Profile Settings"}</span>}
           </a>
 
           <a
             href="#logout"
             className="menu-item logout"
             onClick={() => handleMenuClick("logout")}
-            title="Logout"
+            title="Sign Out"
           >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-            >
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            {isMenuOpen && <span>Logout</span>}
+            {isMenuOpen && <span>Sign Out</span>}
           </a>
-
-          {isMenuOpen && <div className="footer-links"></div>}
+          
+          {isMenuOpen && <div className="footer-links" style={{fontSize: '0.7rem', color: 'var(--sidebar-text)', opacity: 0.5, textAlign: 'center', marginTop: '4px'}}>RS Portal v1.2</div>}
         </div>
       </aside>
 

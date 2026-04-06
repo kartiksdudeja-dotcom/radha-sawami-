@@ -108,9 +108,9 @@ const Dashboard = ({ onLogout, user }) => {
       return <Store />;
     }
 
-    // Show Store Admin page (admin only)
+    // Show Store Admin page (admin or store power)
     if (activeMenu === 'store-admin') {
-      if (!user?.is_admin) {
+      if (!user?.is_admin && !user?.can_manage_store) {
         setActiveMenu('home');
         return null;
       }
@@ -119,7 +119,7 @@ const Dashboard = ({ onLogout, user }) => {
 
     // Show Attendance page
     if (activeMenu === 'attendance') {
-      return <Attendance />;
+      return <Attendance user={user} />;
     }
 
     // Show Branch page
@@ -179,7 +179,7 @@ const Dashboard = ({ onLogout, user }) => {
         setActiveMenu('home');
         return null;
       }
-      return <AdminMaster />;
+      return <AdminMaster user={user} />;
     }
 
     // Show Reports page
@@ -209,7 +209,7 @@ const Dashboard = ({ onLogout, user }) => {
 
     // Show Notifications page
     if (activeMenu === 'notifications') {
-      return <Notification />;
+      return <Notification onNavigate={handleNavigate} />;
     }
 
     // Show Seva Category pages

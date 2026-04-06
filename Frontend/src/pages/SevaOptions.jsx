@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import '../styles/Dashboard.css';
+import '../styles/SevaOptions.css';
 import { API_ENDPOINTS } from '../config/apiConfig';
 
 const SevaOptions = () => {
   const [sevaOptions, setSevaOptions] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [formLoading, setFormLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   
@@ -39,7 +40,7 @@ const SevaOptions = () => {
     e.preventDefault();
     if (!newCategory || !newSevaName) return;
 
-    setLoading(true);
+    setFormLoading(true);
     setError('');
     setSuccess('');
 
@@ -51,16 +52,18 @@ const SevaOptions = () => {
       });
       const result = await response.json();
       if (result.success) {
-        setSuccess('Seva option added successfully!');
+        setSuccess('✓ Seva option added successfully!');
         setNewSevaName('');
         fetchSevaOptions();
+        // Hide success message after 3 seconds
+        setTimeout(() => setSuccess(''), 3000);
       } else {
         setError(result.error || 'Failed to add seva option');
       }
     } catch (err) {
-      setError('Error connecting to server');
+      setError('❌ Error connecting to server');
     } finally {
-      setLoading(false);
+      setFormLoading(false);
     }
   };
 
@@ -77,32 +80,34 @@ const SevaOptions = () => {
       });
       const result = await response.json();
       if (result.success) {
-        setSuccess('Seva option deleted successfully!');
+        setSuccess('🗑️ Deleted successfully!');
         fetchSevaOptions();
+        setTimeout(() => setSuccess(''), 3000);
       } else {
         setError(result.error || 'Failed to delete seva option');
       }
     } catch (err) {
-      setError('Error connecting to server');
+      setError('❌ Error connecting to server');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="members-container" style={{ padding: '20px' }}>
-      <div className="members-header">
-        <h1>Seva Options Management</h1>
-        <p className="subtitle">Add or remove options that appear in the Seva attendance system.</p>
+    <div className="seva-options-container">
+      {/* Page Header */}
+      <div className="seva-options-header">
+        <h1>⚙️ Seva Master</h1>
+        <p className="subtitle">Configure and manage service categories for the attendance system.</p>
       </div>
 
-      <div className="members-content">
-        {/* Add New Option Form */}
-        <div className="add-member-form" style={{ marginBottom: '30px', background: '#f9f9f9', padding: '20px', borderRadius: '8px' }}>
-          <h3>Add New Seva Option</h3>
-          <form onSubmit={handleAddSevaOption} style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', marginTop: '15px' }}>
-            <div className="form-group" style={{ flex: '1', minWidth: '200px' }}>
-              <label>Category (Assocation/Unit)</label>
+      <div className="seva-options-content">
+        {/* Add New Option Card */}
+        <div className="add-option-card">
+          <h3>➕ Add New Seva Option</h3>
+          <form onSubmit={handleAddSevaOption} className="seva-form">
+            <div className="form-group">
+              <label>Category (Association / Unit)</label>
               <input 
                 type="text" 
                 value={newCategory} 
@@ -112,7 +117,7 @@ const SevaOptions = () => {
                 required
               />
             </div>
-            <div className="form-group" style={{ flex: '1', minWidth: '200px' }}>
+            <div className="form-group">
               <label>Seva Name</label>
               <input 
                 type="text" 
@@ -123,53 +128,70 @@ const SevaOptions = () => {
                 required
               />
             </div>
-            <div className="form-actions" style={{ display: 'flex', alignItems: 'flex-end' }}>
-              <button type="submit" className="btn-primary" disabled={loading} style={{ height: '45px' }}>
-                {loading ? 'Adding...' : 'Add Option'}
-              </button>
-            </div>
+            <button type="submit" className="btn-primary" disabled={formLoading || loading}>
+              {formLoading ? 'Adding...' : 'Add Option'}
+            </button>
           </form>
-          {error && <div className="error-message" style={{ color: 'red', marginTop: '10px' }}>{error}</div>}
-          {success && <div className="success-message" style={{ color: 'green', marginTop: '10px' }}>{success}</div>}
+          
+          {error && (
+            <div className="feedback-message error">
+              <span>⚠️</span> {error}
+            </div>
+          )}
+          {success && (
+            <div className="feedback-message success">
+              <span>{success.includes('Deleted') ? '🗑️' : '✅'}</span> {success}
+            </div>
+          )}
         </div>
 
-        {/* Existing Options Table */}
-        <div className="members-list-container">
-          <h3>Current Seva Options</h3>
+        {/* Existing Options List */}
+        <div className="options-list-container">
+          <h3>📋 Current Seva Options</h3>
+          
           {loading && sevaOptions.length === 0 ? (
-            <div className="loading">Loading seva options...</div>
+            <div className="loading-row">
+              <p>🔄 Loading configurations...</p>
+            </div>
           ) : (
-            <table className="members-table">
-              <thead>
-                <tr>
-                  <th>Category</th>
-                  <th>Seva Name</th>
-                  <th>Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sevaOptions.map((option) => (
-                  <tr key={option.ID}>
-                    <td>{option.Category}</td>
-                    <td>{option.SevaName}</td>
-                    <td>
-                      <button 
-                        className="btn-delete" 
-                        onClick={() => handleDeleteSevaOption(option.ID)}
-                        style={{ color: 'red', background: 'none', border: 'none', cursor: 'pointer' }}
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {sevaOptions.length === 0 && !loading && (
+            <div className="options-table-wrapper">
+              <table className="options-table">
+                <thead>
                   <tr>
-                    <td colSpan="3" style={{ textAlign: 'center' }}>No seva options found.</td>
+                    <th>Category</th>
+                    <th>Seva Name</th>
+                    <th>Actions</th>
                   </tr>
-                )}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {sevaOptions.map((option) => (
+                    <tr key={option.ID}>
+                      <td><strong>{option.Category}</strong></td>
+                      <td>{option.SevaName}</td>
+                      <td>
+                        <button 
+                          className="btn-delete" 
+                          onClick={() => handleDeleteSevaOption(option.ID)}
+                          title="Delete permanently"
+                        >
+                          🗑️ Clear
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                  {sevaOptions.length === 0 && !loading && (
+                    <tr>
+                      <td colSpan="3">
+                        <div className="empty-state">
+                          <div className="empty-icon">📁</div>
+                          <p>No seva options found. Start by adding one above.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>

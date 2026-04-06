@@ -5,6 +5,7 @@ import {
   getUser,
   loginAsMember,
   stopImpersonating,
+  checkRole,
 } from "../controllers/authController.js";
 
 const router = express.Router();
@@ -13,6 +14,7 @@ const router = express.Router();
 router.post("/login", login);
 router.post("/signup", signup);
 router.get("/user/:id", getUser);
+router.post("/check-role", checkRole);
 
 // Admin Impersonation Routes
 router.post("/login-as-member", loginAsMember);

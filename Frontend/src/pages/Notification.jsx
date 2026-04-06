@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import '../styles/Notification.css';
 
-const Notification = () => {
+const Notification = ({ onNavigate }) => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [pushEnabled, setPushEnabled] = useState(false);
@@ -19,6 +19,7 @@ const Notification = () => {
   const [sendPush, setSendPush] = useState(true);
   const [sendingMessage, setSendingMessage] = useState(false);
   const [sendStatus, setSendStatus] = useState({ type: '', message: '' });
+  const [eventDate, setEventDate] = useState('');
 
   // Check secure context on mount
   useEffect(() => {
@@ -388,7 +389,8 @@ Current VAPID Key: ${import.meta.env.VITE_VAPID_PUBLIC_KEY?.substring(0, 20)}...
   };
 
   // Mark notification as read
-  const markAsRead = async (notificationId) => {
+  const markAsRead = async (notificationId, e) => {
+    if (e) e.stopPropagation(); // Prevent card click when clicking checkmark
     try {
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
@@ -413,7 +415,8 @@ Current VAPID Key: ${import.meta.env.VITE_VAPID_PUBLIC_KEY?.substring(0, 20)}...
   };
 
   // Delete notification
-  const deleteNotification = async (notificationId) => {
+  const deleteNotification = async (notificationId, e) => {
+    if (e) e.stopPropagation(); // Prevent card click when clicking delete
     try {
       const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 
@@ -460,6 +463,7 @@ Current VAPID Key: ${import.meta.env.VITE_VAPID_PUBLIC_KEY?.substring(0, 20)}...
         type: messageType,
         sendPush: sendPush,
         is_admin: true,
+        event_date: (messageType === 'event' || messageType === 'upcoming_event') ? eventDate : null,
       };
 
       if (!sendToAll) {
@@ -486,6 +490,7 @@ Current VAPID Key: ${import.meta.env.VITE_VAPID_PUBLIC_KEY?.substring(0, 20)}...
         setMessageTitle('');
         setMessageBody('');
         setMessageType('general');
+        setEventDate('');
         // Reload notifications
         loadNotifications();
       } else {
@@ -502,6 +507,29 @@ Current VAPID Key: ${import.meta.env.VITE_VAPID_PUBLIC_KEY?.substring(0, 20)}...
       });
     } finally {
       setSendingMessage(false);
+    }
+  };
+
+  const handleNotificationClick = (notification) => {
+    if (!onNavigate) return;
+
+    const type = notification.type || notification.message_type;
+    
+    // Auto mark as read when clicked
+    if (!notification.read) {
+      markAsRead(notification.id);
+    }
+
+    if (type === 'event' || type === 'upcoming_event') {
+      onNavigate('home'); // Go to AaglaSatsang
+    } else if (type === 'store') {
+      onNavigate('store');
+    } else if (type === 'attendance') {
+      onNavigate('attendance');
+    } else if (type === 'seva') {
+      onNavigate('seva');
+    } else if (type === 'profile') {
+      onNavigate('profile');
     }
   };
 
@@ -708,8 +736,23 @@ Current VAPID Key: ${import.meta.env.VITE_VAPID_PUBLIC_KEY?.substring(0, 20)}...
                   <option value="seva">🙏 Seva</option>
                   <option value="store">🛒 Store</option>
                   <option value="event">📅 Event</option>
+                  <option value="upcoming_event">📌 Upcoming Event</option>
                 </select>
               </div>
+
+              {(messageType === 'event' || messageType === 'upcoming_event') && (
+                <div className="form-group">
+                  <label htmlFor="eventDate">📅 Event Date & Time</label>
+                  <input
+                    id="eventDate"
+                    type="datetime-local"
+                    value={eventDate}
+                    onChange={(e) => setEventDate(e.target.value)}
+                    disabled={sendingMessage}
+                    className="form-input"
+                  />
+                </div>
+              )}
 
               <div className="form-group">
                 <label htmlFor="msgTitle">✏️ Message Title</label>
@@ -808,12 +851,14 @@ Current VAPID Key: ${import.meta.env.VITE_VAPID_PUBLIC_KEY?.substring(0, 20)}...
               <div
                 key={notification.id}
                 className={`notification-card ${notification.read ? 'read' : 'unread'}`}
+                onClick={() => handleNotificationClick(notification)}
+                style={{ cursor: onNavigate ? 'pointer' : 'default' }}
               >
                 <div className={`notification-icon-badge type-${notification.type || 'general'}`}>
                   {notification.type === 'attendance' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>}
                   {notification.type === 'seva' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>}
                   {notification.type === 'store' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>}
-                  {notification.type === 'event' && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>}
+                  {(notification.type === 'event' || notification.type === 'upcoming_event') && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>}
                   {(!notification.type || notification.type === 'general') && <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>}
                 </div>
                 
@@ -830,7 +875,7 @@ Current VAPID Key: ${import.meta.env.VITE_VAPID_PUBLIC_KEY?.substring(0, 20)}...
                 {!notification.read && (
                   <button
                     className="action-btn mark-read"
-                    onClick={() => markAsRead(notification.id)}
+                    onClick={(e) => markAsRead(notification.id, e)}
                     title="Mark as read"
                   >
                     ✓
@@ -838,7 +883,7 @@ Current VAPID Key: ${import.meta.env.VITE_VAPID_PUBLIC_KEY?.substring(0, 20)}...
                 )}
                 <button
                   className="action-btn delete"
-                  onClick={() => deleteNotification(notification.id)}
+                  onClick={(e) => deleteNotification(notification.id, e)}
                   title="Delete"
                 >
                   ✕

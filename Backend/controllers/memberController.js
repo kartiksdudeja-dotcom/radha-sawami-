@@ -41,6 +41,8 @@ export const getAllMembers = async (req, res) => {
       association_member: (member.Association_member || "").trim(),
       unit_member: (member.Unit_Member || "").trim(),
       is_admin: member.ChkAdmin ? true : false,
+      can_manage_attendance: member.CanManageAttendance ? true : false,
+      can_manage_store: member.CanManageStore ? true : false,
       is_profile_complete: member.IsProfileComplete ? true : false,
     }));
 
@@ -66,6 +68,101 @@ export const getAllMembers = async (req, res) => {
     res.json({ success: true, data: uniqueMembers });
   } catch (error) {
     console.error("Error fetching members:", error);
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Get family members for a specific user (logged-in user + their family)
+export const getFamilyMembers = async (req, res) => {
+  try {
+    const pool = await getPool();
+    const userId = req.params.userId;
+
+    if (!userId) {
+      return res.status(400).json({ success: false, error: "User ID is required" });
+    }
+
+    // First get the logged-in user's details
+    const userResult = await pool
+      .request()
+      .input("userId", sql.Int, userId)
+      .query(`SELECT * FROM MemberDetails WHERE UserID = @userId`);
+
+    if (userResult.recordset.length === 0) {
+      return res.status(404).json({ success: false, error: "User not found" });
+    }
+
+    const currentUser = userResult.recordset[0];
+    const currentUserName = (currentUser.Name || "").trim();
+    
+    // Extract surname (last word of name) for family matching
+    const nameParts = currentUserName.split(/\s+/);
+    const surname = nameParts.length > 1 ? nameParts[nameParts.length - 1] : currentUserName;
+
+    console.log(`🔍 Looking for family members with surname: "${surname}" for user: "${currentUserName}"`);
+
+    // Find all members with the same surname (last name)
+    const familyResult = await pool
+      .request()
+      .input("userId", sql.Int, userId)
+      .input("surname", sql.NVarChar, `% ${surname}`)
+      .input("exactSurname", sql.NVarChar, surname)
+      .query(`
+        SELECT * FROM MemberDetails 
+        WHERE UserID = @userId
+          OR (LTRIM(RTRIM(Name)) LIKE @surname)
+          OR (LTRIM(RTRIM(Name)) = @exactSurname)
+        ORDER BY MemberID DESC
+      `);
+
+    const cleanedData = familyResult.recordset.map((member) => ({
+      id: member.UserID,
+      memberid: member.MemberID,
+      name: (member.Name || "").trim(),
+      username: (member.UserName || "").trim(),
+      gender: (member.Gender || "").trim(),
+      status: (member.Status || "").trim(),
+      branch: (member.Branch || "").trim(),
+      region: (member.Region || "").trim(),
+      uid: (member.UID || "").trim(),
+      initial: (member.Initital || "").trim(),
+      dob: (member.DOB || "").trim(),
+      email: (member.Email || "").trim(),
+      number: (member.Number || "").trim(),
+      address: (member.Address || "").trim(),
+      office_address: (member.OfficeAddress || "").trim(),
+      blood_group: (member.Blood_Group || "").trim(),
+      father_name: (member.Father_Name || "").trim(),
+      mother_name: (member.Mother_Name || "").trim(),
+      husband_name: (member.Husband_Name || "").trim(),
+      wife_name: (member.Wife_Name || "").trim(),
+      first_initiation: (member.FirstInitiation || "").trim(),
+      second_initiation: (member.SecondInitiation || "").trim(),
+      jigyasu_registration: (member.Jigyasu_Registeration || "").trim(),
+      office_bearer: (member.Office_Bearer || "").trim(),
+      association_member: (member.Association_member || "").trim(),
+      unit_member: (member.Unit_Member || "").trim(),
+      is_admin: member.ChkAdmin ? true : false,
+      can_manage_attendance: member.CanManageAttendance ? true : false,
+      can_manage_store: member.CanManageStore ? true : false,
+      is_profile_complete: member.IsProfileComplete ? true : false,
+    }));
+
+    // Remove duplicates
+    const uniqueMembers = [];
+    const seen = new Set();
+    for (const member of cleanedData) {
+      const key = `${(member.uid || "NO_UID").toUpperCase()}|${(member.name || "NO_NAME").toUpperCase()}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        uniqueMembers.push(member);
+      }
+    }
+
+    console.log(`👨‍👩‍👧‍👦 Family members for user ${userId}: ${uniqueMembers.length} found`);
+    res.json({ success: true, data: uniqueMembers });
+  } catch (error) {
+    console.error("Error fetching family members:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
@@ -382,6 +479,33 @@ export const searchMembers = async (req, res) => {
 
     res.json({ success: true, data: result.recordset });
   } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+// Update member power/permissions
+export const updateMemberPower = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { is_admin, can_manage_attendance, can_manage_store } = req.body;
+    const pool = await getPool();
+
+    await pool.request()
+      .input("id", sql.Int, id)
+      .input("isAdmin", sql.Bit, is_admin ? 1 : 0)
+      .input("canAttendance", sql.Bit, can_manage_attendance ? 1 : 0)
+      .input("canStore", sql.Bit, can_manage_store ? 1 : 0)
+      .query(`
+        UPDATE MemberDetails 
+        SET ChkAdmin = @isAdmin, 
+            CanManageAttendance = @canAttendance, 
+            CanManageStore = @canStore 
+        WHERE UserID = @id
+      `);
+
+    res.json({ success: true, message: "Permissions updated successfully" });
+  } catch (error) {
+    console.error("Error updating member permissions:", error);
     res.status(500).json({ success: false, error: error.message });
   }
 };
